@@ -10,5 +10,5 @@ abstract class TypeAdapter<T> {
 
     abstract fun write(output: JSONObject, value: T?): JSONObject
 
-    abstract fun read(input: JSONObject): T
+    abstract fun read(input: JSONObject, key: String): T?
 }
