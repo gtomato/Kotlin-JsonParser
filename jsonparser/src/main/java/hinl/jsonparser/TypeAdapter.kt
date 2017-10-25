@@ -12,7 +12,9 @@ abstract class TypeAdapter<T> {
         TODO("refer to the static ref of map")
     }
 
-    abstract fun write(output: JSONObject, key: String, value: T?): JSONObject
+//    @Throws
+    abstract fun write(output: JsonWriter, key: String, value: T?, config: JsonParserConfig): JsonWriter
 
-    abstract fun read(input: JSONObject, key: String): T?
+//    @Throws
+    abstract fun read(input: JSONObject, key: String, config: JsonParserConfig): T?
 }
