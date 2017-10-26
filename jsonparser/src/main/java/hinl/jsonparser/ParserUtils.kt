@@ -1,11 +1,7 @@
 package hinl.jsonparser
 
-import org.json.JSONObject
-import java.util.HashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
 
@@ -17,4 +13,32 @@ annotation class Schema(val JsonName: String = "",
 
 fun Any.toJson(): String {
     return JsonSerializer().serialize(this, JsonFormatter.DEFAULT_TypeAdapterMap, JsonParserConfig())
+}
+
+
+fun <T: Any> String.parseJson(kClass: KClass<T>): T? {
+    return JsonFormatter().parseJson(this, kClass)
+}
+
+
+inline fun <reified T: Any, reified C: Collection<T>> String.parseJson(typeToken: TypeToken<C>): Collection<T>? {
+    return JsonFormatter().parseJson(this, typeToken)
+}
+
+internal fun KProperty1<*, *>.getJsonName(): String {
+    val schema = (this.javaField?.annotations?.find { it is Schema } as? Schema)
+    if (schema != null) {
+        return schema.JsonName
+    } else {
+        return ""
+    }
+}
+
+internal fun KProperty1<*, *>.isDeSerializable(): Boolean {
+    val schema = (this.javaField?.annotations?.find { it is Schema } as? Schema)
+    if (schema != null) {
+        return schema.DeSerializable
+    } else {
+        return true
+    }
 }

@@ -13,6 +13,8 @@ abstract class TypeAdapter<T> {
 //    @Throws
     abstract fun write(output: JsonWriter, value: T?, config: JsonParserConfig): JsonWriter
 
-//    @Throws
+    //    @Throws
     abstract fun read(input: JSONObject, key: String, config: JsonParserConfig): T?
+
+    abstract fun read(json: String): T?
 }

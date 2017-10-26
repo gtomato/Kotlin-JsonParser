@@ -1,14 +1,9 @@
 package hinl.jsonparser
 
-import android.util.Log
 import hinl.jsonparser.typeadapter.*
-import org.json.JSONArray
-import org.json.JSONObject
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.jvmErasure
 
 
 class JsonFormatter(
@@ -35,7 +30,7 @@ class JsonFormatter(
         val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")
     }
 
-    val mTypeAdapterMap = mutableMapOf<KClass<*>, TypeAdapter<*>>().apply {
+    val mTypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>().apply {
         putAll(DEFAULT_TypeAdapterMap)
         typeAdapterMap?.let {
             putAll(it)
@@ -43,4 +38,15 @@ class JsonFormatter(
     }
     val mDateFormat: String = dateFormat
 
+    fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
+        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap)
+    }
+
+    inline fun <reified T: Any, reified C: Collection<T>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T>? {
+        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap)
+    }
+
+    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S>> parseJson(json: String, kClass: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): Map<F, S> {
+        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap)
+    }
 }
