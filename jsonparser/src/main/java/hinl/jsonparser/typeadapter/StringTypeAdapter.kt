@@ -16,7 +16,7 @@ class CharSequenceTypeAdapter: TypeAdapter<CharSequence>() {
         }
         return input.getString(key)
     }
-    override fun read(json: String): CharSequence? {
+    override fun read(json: String, config: JsonParserConfig): CharSequence? {
         return json
     }
 }
@@ -33,7 +33,7 @@ class StringTypeAdapter: TypeAdapter<String>(){
         return input.getString(key)
     }
 
-    override fun read(json: String): String? {
+    override fun read(json: String, config: JsonParserConfig): String? {
         return json
     }
 }
@@ -50,7 +50,7 @@ class CharTypeAdapter: TypeAdapter<Char>(){
         return input.getString(key).single()
     }
 
-    override fun read(json: String): Char? {
+    override fun read(json: String, config: JsonParserConfig): Char? {
         return json.single()
     }
 }

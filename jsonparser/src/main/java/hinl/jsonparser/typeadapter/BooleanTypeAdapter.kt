@@ -23,7 +23,7 @@ class BooleanTypeAdapter: TypeAdapter<Boolean>(){
         return input.getBoolean(key)
     }
 
-    override fun read(json: String): Boolean? {
+    override fun read(json: String, config: JsonParserConfig): Boolean? {
         return json.toBoolean()
     }
 }

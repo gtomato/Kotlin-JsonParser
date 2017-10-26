@@ -16,5 +16,5 @@ abstract class TypeAdapter<T> {
     //    @Throws
     abstract fun read(input: JSONObject, key: String, config: JsonParserConfig): T?
 
-    abstract fun read(json: String): T?
+    abstract fun read(json: String, config: JsonParserConfig): T?
 }

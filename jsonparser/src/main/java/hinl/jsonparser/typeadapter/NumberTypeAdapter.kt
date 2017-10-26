@@ -20,7 +20,7 @@ class IntTypeAdapter: TypeAdapter<Int>() {
         return input.getInt(key)
     }
 
-    override fun read(json: String): Int? {
+    override fun read(json: String, config: JsonParserConfig): Int? {
         return json.toInt()
     }
 }
@@ -37,7 +37,7 @@ class LongTypeAdapter: TypeAdapter<Long>() {
         return input.getLong(key)
     }
 
-    override fun read(json: String): Long? {
+    override fun read(json: String, config: JsonParserConfig): Long? {
         return json.toLong()
     }
 }
@@ -54,7 +54,7 @@ class ShortTypeAdapter: TypeAdapter<Short>() {
         return input.getInt(key).toShort()
     }
 
-    override fun read(json: String): Short? {
+    override fun read(json: String, config: JsonParserConfig): Short? {
         return json.toShort()
     }
 }
@@ -71,7 +71,7 @@ class DoubleTypeAdapter: TypeAdapter<Double>() {
         return input.getDouble(key)
     }
 
-    override fun read(json: String): Double? {
+    override fun read(json: String, config: JsonParserConfig): Double? {
         return json.toDouble()
     }
 }
@@ -88,7 +88,7 @@ class FloatTypeAdapter: TypeAdapter<Float>() {
         return input.getDouble(key).toFloat()
     }
 
-    override fun read(json: String): Float? {
+    override fun read(json: String, config: JsonParserConfig): Float? {
         return json.toFloat()
     }
 }
@@ -105,17 +105,23 @@ class BigDecimalTypeAdapter: TypeAdapter<BigDecimal>() {
         return BigDecimal(input.get(key).toString())
     }
 
-    override fun read(json: String): BigDecimal? {
+    override fun read(json: String, config: JsonParserConfig): BigDecimal? {
         return BigDecimal(json)
     }
 }
 
 class BigIntegerTypeAdapter: TypeAdapter<BigInteger>() {
+
     override fun write(output: JsonWriter, value: BigInteger?, config: JsonParserConfig): JsonWriter {
         return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): BigInteger? {
         return BigInteger(input.get(key).toString())
+    }
+
+
+    override fun read(json: String, config: JsonParserConfig): BigInteger? {
+        return BigInteger(json)
     }
 }

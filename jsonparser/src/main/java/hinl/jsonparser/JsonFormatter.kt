@@ -37,16 +37,17 @@ class JsonFormatter(
         }
     }
     val mDateFormat: String = dateFormat
+    val mConfig: JsonParserConfig = JsonParserConfig()
 
     fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
-        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap)
+        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
     }
 
     inline fun <reified T: Any, reified C: Collection<T>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T>? {
-        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap)
+        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
     }
 
     inline fun <reified F: Any, reified S: Any, reified C: Map<F, S>> parseJson(json: String, kClass: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): Map<F, S> {
-        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap)
+        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
     }
 }
