@@ -6,6 +6,7 @@ import java.io.StringWriter
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
@@ -19,7 +20,43 @@ internal class JsonSerializer {
         // for obj is a single object
         val stringWriter = StringWriter()
         val jsonWriter = JsonWriter(stringWriter)
-        createJsonObject(jsonWriter, obj, typeAdapters, config)
+
+        when (obj) {
+            is Collection<*> -> {
+                jsonWriter.beginArray()
+                for (any in obj) {
+                    if (any != null) {
+                        createJsonObject(jsonWriter, any, typeAdapters, config)
+                    } else {
+                        jsonWriter.nullValue()
+                    }
+                }
+                jsonWriter.endArray()
+            }
+            is Map<*, *> -> {
+                jsonWriter.beginObject()
+                obj.iterator().forEach {
+                    val key = it.key?.toString() ?: "null"
+                    it.value?.let {
+                        val typeAdapter = typeAdapters[it::class] as? TypeAdapter<Any>
+                        if (typeAdapter != null) {
+                            typeAdapter.write(
+                                    output = jsonWriter,
+                                    key = key,
+                                    value = it,
+                                    config = config)
+                        } else {
+                            jsonWriter.name(key)
+                            createJsonObject(jsonWriter, it, typeAdapters, config)
+                        }
+                    } ?: let {
+                        jsonWriter.nullValue()
+                    }
+                }
+                jsonWriter.endObject()
+            }
+            else -> createJsonObject(jsonWriter, obj, typeAdapters, config)
+        }
         jsonWriter.close()
         return stringWriter.toString()
     }
@@ -29,8 +66,8 @@ internal class JsonSerializer {
         obj::class.memberProperties.forEach {
             val schema = it.javaField?.annotations?.find { it is Schema } as? Schema
             if (schema?.Serializable == true || schema == null) {
-                val typeAdapter = typeAdapters[it.returnType.jvmErasure] as? TypeAdapter<Any>
                 val key = schema?.JsonName ?: it.name
+                val typeAdapter = typeAdapters[it.returnType.jvmErasure] as? TypeAdapter<Any>
                 val value = it.getter.call(obj)
                 if (typeAdapter != null) {
                     typeAdapter.write(
@@ -50,16 +87,5 @@ internal class JsonSerializer {
         }
         jsonWriter.endObject()
     }
-
-
-//    private fun Any.getJsonValue(typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>): Any {
-//        // find all
-//        val typeAdapter = typeAdapters[this::class]
-//        typeAdapter?.write()
-//        return when (this) {
-//
-//            else -> serialize(this)
-//        }
-//    }
 }
 
