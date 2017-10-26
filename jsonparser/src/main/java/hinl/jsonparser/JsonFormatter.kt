@@ -5,6 +5,7 @@ import hinl.jsonparser.typeadapter.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
+import java.math.BigInteger
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
@@ -19,7 +20,7 @@ class JsonFormatter(
     companion object {
         val DEFAULT_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
                 Boolean::class to BooleanTypeAdapter(),
-                Char::class to CharSequenceTypeAdapter(),
+                CharSequence::class to CharSequenceTypeAdapter(),
                 String::class to StringTypeAdapter(),
                 Char::class to CharTypeAdapter(),
                 Int::class to IntTypeAdapter(),
@@ -27,7 +28,8 @@ class JsonFormatter(
                 Short::class to ShortTypeAdapter(),
                 Double::class to DoubleTypeAdapter(),
                 Float::class to FloatTypeAdapter(),
-                BigDecimal::class to BigDecimalTypeAdapter()
+                BigDecimal::class to BigDecimalTypeAdapter(),
+                BigInteger::class to BigIntegerTypeAdapter()
         )
 
         val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")

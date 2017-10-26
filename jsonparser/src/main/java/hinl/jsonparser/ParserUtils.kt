@@ -13,4 +13,8 @@ import kotlin.reflect.jvm.javaField
 @Retention (AnnotationRetention.RUNTIME)
 annotation class Schema(val JsonName: String = "",
                         val Serializable: Boolean = true,
-                        val DeSerializable: Boolean = false)
+                        val DeSerializable: Boolean = true)
+
+fun Any.toJson(): String {
+    return JsonSerializer().serialize(this, JsonFormatter.DEFAULT_TypeAdapterMap, JsonParserConfig())
+}
