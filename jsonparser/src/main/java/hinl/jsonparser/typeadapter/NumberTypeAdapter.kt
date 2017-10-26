@@ -9,8 +9,8 @@ import java.math.BigInteger
 
 
 class IntTypeAdapter: TypeAdapter<Int>() {
-    override fun write(output: JsonWriter, key: String, value: Int?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: Int?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Int? {
@@ -19,8 +19,8 @@ class IntTypeAdapter: TypeAdapter<Int>() {
 }
 
 class LongTypeAdapter: TypeAdapter<Long>() {
-    override fun write(output: JsonWriter, key: String, value: Long?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: Long?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Long? {
@@ -29,8 +29,8 @@ class LongTypeAdapter: TypeAdapter<Long>() {
 }
 
 class ShortTypeAdapter: TypeAdapter<Short>() {
-    override fun write(output: JsonWriter, key: String, value: Short?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: Short?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Short? {
@@ -39,8 +39,8 @@ class ShortTypeAdapter: TypeAdapter<Short>() {
 }
 
 class DoubleTypeAdapter: TypeAdapter<Double>() {
-    override fun write(output: JsonWriter, key: String, value: Double?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: Double?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Double? {
@@ -49,8 +49,8 @@ class DoubleTypeAdapter: TypeAdapter<Double>() {
 }
 
 class FloatTypeAdapter: TypeAdapter<Float>() {
-    override fun write(output: JsonWriter, key: String, value: Float?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: Float?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Float? {
@@ -59,8 +59,8 @@ class FloatTypeAdapter: TypeAdapter<Float>() {
 }
 
 class BigDecimalTypeAdapter: TypeAdapter<BigDecimal>() {
-    override fun write(output: JsonWriter, key: String, value: BigDecimal?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: BigDecimal?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): BigDecimal? {
@@ -69,8 +69,8 @@ class BigDecimalTypeAdapter: TypeAdapter<BigDecimal>() {
 }
 
 class BigIntegerTypeAdapter: TypeAdapter<BigInteger>() {
-    override fun write(output: JsonWriter, key: String, value: BigInteger?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: BigInteger?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): BigInteger? {

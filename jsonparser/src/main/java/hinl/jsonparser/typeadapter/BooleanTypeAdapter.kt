@@ -7,8 +7,7 @@ import org.json.JSONObject
 
 
 class BooleanTypeAdapter: TypeAdapter<Boolean>(){
-    override fun write(output: JsonWriter, key: String, value: Boolean?, config: JsonParserConfig): JsonWriter {
-        output.name(key)
+    override fun write(output: JsonWriter, value: Boolean?, config: JsonParserConfig): JsonWriter {
         if (value != null) {
             output.value(value)
         } else {

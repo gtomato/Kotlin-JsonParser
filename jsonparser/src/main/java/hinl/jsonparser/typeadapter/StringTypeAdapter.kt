@@ -7,8 +7,8 @@ import org.json.JSONObject
 
 
 class CharSequenceTypeAdapter: TypeAdapter<CharSequence>() {
-    override fun write(output: JsonWriter, key: String, value: CharSequence?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value?.toString())
+    override fun write(output: JsonWriter, value: CharSequence?, config: JsonParserConfig): JsonWriter {
+        return output.value(value?.toString())
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): CharSequence? {
@@ -17,8 +17,8 @@ class CharSequenceTypeAdapter: TypeAdapter<CharSequence>() {
 }
 
 class StringTypeAdapter: TypeAdapter<String>(){
-    override fun write(output: JsonWriter, key: String, value: String?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value)
+    override fun write(output: JsonWriter, value: String?, config: JsonParserConfig): JsonWriter {
+        return output.value(value)
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): String? {
@@ -27,8 +27,8 @@ class StringTypeAdapter: TypeAdapter<String>(){
 }
 
 class CharTypeAdapter: TypeAdapter<Char>(){
-    override fun write(output: JsonWriter, key: String, value: Char?, config: JsonParserConfig): JsonWriter {
-        return output.name(key).value(value?.toString())
+    override fun write(output: JsonWriter, value: Char?, config: JsonParserConfig): JsonWriter {
+        return output.value(value?.toString())
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Char? {
