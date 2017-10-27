@@ -20,8 +20,11 @@ fun <T: Any> String.parseJson(kClass: KClass<T>): T? {
     return JsonFormatter().parseJson(this, kClass)
 }
 
+inline fun <reified T: Any, reified C: Collection<T?>> String.parseJson(typeToken: TypeToken<C>): Collection<T?>? {
+    return JsonFormatter().parseJson(this, typeToken)
+}
 
-inline fun <reified T: Any, reified C: Collection<T>> String.parseJson(typeToken: TypeToken<C>): Collection<T>? {
+inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> String.parseJson(typeToken: TypeToken<C>): Map<F, S?> {
     return JsonFormatter().parseJson(this, typeToken)
 }
 
