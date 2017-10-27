@@ -35,9 +35,9 @@ class JsonDeserializer {
         if (json.equals("null", true)) {
             return null
         }
-        val typeAdapter = typeAdapterMap[kClass]
+        val typeAdapter = getTypeAdapter(kClass, typeAdapterMap)
         if (typeAdapter != null) {
-            return typeAdapter.read(json, config) as T?
+            return typeAdapter.read(kClass = kClass, json = json, config = config) as T?
         }
         val constructor = kClass.primaryConstructor
         val paramsMap = hashMapOf<KParameter, Any?>()
@@ -77,9 +77,9 @@ class JsonDeserializer {
                         throw IllegalArgumentException()
                     }
                 } else {
-                    val typeAdapter = typeAdapterMap[memberKClass]
+                    val typeAdapter = getTypeAdapter(memberKClass, typeAdapterMap)
                     if (typeAdapter != null) {
-                        val obj = typeAdapter.read(jsonObject, jsonKey, config)
+                        val obj = typeAdapter.read(memberKClass, jsonObject, jsonKey, config)
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
                         } else {
@@ -120,6 +120,14 @@ class JsonDeserializer {
         } else {
             TODO("Throw Exception")
             throw IllegalArgumentException()
+        }
+    }
+
+    private fun getTypeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): TypeAdapter<*>? {
+        if (kClass.isSubclassOf(Enum::class)) {
+            return typeAdapterMap[Enum::class]
+        } else {
+            return typeAdapterMap[kClass]
         }
     }
 }

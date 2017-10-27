@@ -24,7 +24,8 @@ class JsonFormatter(
                 Double::class to DoubleTypeAdapter(),
                 Float::class to FloatTypeAdapter(),
                 BigDecimal::class to BigDecimalTypeAdapter(),
-                BigInteger::class to BigIntegerTypeAdapter()
+                BigInteger::class to BigIntegerTypeAdapter(),
+                Enum::class to EnumTypeAdapter()
         )
 
         val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")
@@ -47,7 +48,7 @@ class JsonFormatter(
         return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
     }
 
-    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S>> parseJson(json: String, kClass: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): Map<F, S> {
+    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S>> parseJson(json: String, kClass: TypeToken<C>): Map<F, S> {
         return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
     }
 }
