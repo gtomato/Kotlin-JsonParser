@@ -3,6 +3,7 @@ package hinl.jsonparser
 import hinl.jsonparser.typeadapter.*
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.*
 import kotlin.reflect.KClass
 
 
@@ -25,7 +26,9 @@ class JsonFormatter(
                 Float::class to FloatTypeAdapter(),
                 BigDecimal::class to BigDecimalTypeAdapter(),
                 BigInteger::class to BigIntegerTypeAdapter(),
-                Enum::class to EnumTypeAdapter()
+                Enum::class to EnumTypeAdapter(),
+                Date::class to DateTypeAdapter(),
+                Calendar::class to CalendarTypeAdapter()
         )
 
         val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")

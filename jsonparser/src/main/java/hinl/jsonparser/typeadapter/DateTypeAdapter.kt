@@ -12,7 +12,7 @@ import java.util.*
  */
 
 
-class DateTypeAdapter: TypeAdapter<Date>() {
+class DateTypeAdapter : TypeAdapter<Date>() {
     override fun write(output: JsonWriter, value: Date?, config: JsonParserConfig): JsonWriter {
         val formatter = SimpleDateFormat(config.dataFormat)
         val dateString = try {
@@ -39,6 +39,43 @@ class DateTypeAdapter: TypeAdapter<Date>() {
 
         return try {
             formatter.parse(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
+class CalendarTypeAdapter : TypeAdapter<Calendar>() {
+    override fun write(output: JsonWriter, value: Calendar?, config: JsonParserConfig): JsonWriter {
+        val formatter = SimpleDateFormat(config.dataFormat)
+        val dateString = try {
+            formatter.format(value?.time)
+        } catch (e: Exception) {
+            null
+        }
+        return output.value(dateString)
+    }
+
+    override fun read(input: JSONObject, key: String, config: JsonParserConfig): Calendar? {
+        val formatter = SimpleDateFormat(config.dataFormat)
+        val dateString = input.getString(key)
+
+        return try {
+            Calendar.getInstance().apply {
+                time = formatter.parse(dateString)
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun read(json: String, config: JsonParserConfig): Calendar? {
+        val formatter = SimpleDateFormat(config.dataFormat)
+
+        return try {
+            Calendar.getInstance().apply {
+                time = formatter.parse(json)
+            }
         } catch (e: Exception) {
             null
         }
