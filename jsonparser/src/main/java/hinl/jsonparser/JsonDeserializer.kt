@@ -11,18 +11,41 @@ import kotlin.reflect.jvm.jvmErasure
 
 class JsonDeserializer {
 
-    inline fun <reified F, reified S, reified C: Map<F, S>>parseJson(json: String, kClass: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Map<F, S> {
-        TODO("Not Support Yet")
-        return mapOf<F, S>()
+    inline fun <reified F, reified S: Any, reified C: Map<F, S?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Map<F, S?> {
+        if (F::class.isSubclassOf(CharSequence::class) || F::class.isSubclassOf(Char::class)) {
+            val hashMap = hashMapOf<F, S?>()
+            val jsonMap = JSONObject(json)
+            for (key in jsonMap.keys()) {
+                val json = jsonMap.get(key).toString()
+                val obj = parseJson(json = json, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
+                if (obj == null && !typeToken.nullableParams) {
+                    throw IllegalArgumentException("")
+                }
+                if (F::class.isSubclassOf(Char::class)) {
+                    hashMap.put(key.single() as F, obj)
+                } else {
+                    hashMap.put(key as F, obj)
+                }
+            }
+            return hashMap
+        } else {
+            throw IllegalArgumentException("Key of the map must be in terms of CharSequence or Char")
+        }
     }
 
-    inline fun <reified T: Any, reified C: Collection<T>>parseJson(json: String, kClass: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Collection<T>? {
-        val kList = ArrayList<T>()
+    inline fun <reified T: Any, reified C: Collection<T?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Collection<T?>? {
+        val kList = ArrayList<T?>()
         val jsonArr = JSONArray(json)
         for (index in 0..jsonArr.length() - 1) {
             val obj = parseJson(json = jsonArr[index].toString(), kClass = T::class, typeAdapterMap = typeAdapterMap, config = config)
             if (obj != null) {
                 kList.add(obj)
+            } else {
+                if (typeToken.nullableParams) {
+                    kList.add(obj)
+                } else {
+                    throw IllegalArgumentException("")
+                }
             }
         }
         if (kList.isEmpty()) {
@@ -76,6 +99,20 @@ class JsonDeserializer {
                         TODO("Throw Exception")
                         throw IllegalArgumentException()
                     }
+                } else if (memberKClass.isSubclassOf(Map::class)) {
+                    val childClass = it.returnType.arguments[1].type?.jvmErasure
+                    val hashMap = hashMapOf<String, Any?>()
+                    if (childClass != null) {
+                        val jsonMap = jsonObject.getJSONObject(jsonKey)
+                        for (key in jsonMap.keys()) {
+                            val json = jsonMap.get(key).toString()
+                            val obj = parseJson(json, childClass, typeAdapterMap, config)
+                            hashMap.put(key, obj)
+                        }
+                        param = hashMap
+                    } else {
+                        param = null
+                    }
                 } else {
                     val typeAdapter = getTypeAdapter(memberKClass, typeAdapterMap)
                     if (typeAdapter != null) {
@@ -96,9 +133,6 @@ class JsonDeserializer {
                 }
             }
         }
-
-        Log.d("DLLM", "Map: " + paramsMap)
-        Log.d("DLLM", "constructor: " + constructor)
         if (paramsMap.isEmpty()) {
             throw IllegalArgumentException()
             TODO("Throw Exception")
@@ -134,4 +168,4 @@ class JsonDeserializer {
 
 
 
-class TypeToken<T>
+class TypeToken<T>(val nullableParams: Boolean = false)

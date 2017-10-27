@@ -1,10 +1,14 @@
 package hinl.jsonparser
 
+import android.util.Log
 import hinl.jsonparser.typeadapter.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.starProjectedType
 
 
 class JsonFormatter(
@@ -47,11 +51,11 @@ class JsonFormatter(
         return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
     }
 
-    inline fun <reified T: Any, reified C: Collection<T>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T>? {
+    inline fun <reified T: Any, reified C: Collection<T?>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T?>? {
         return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
     }
 
-    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S>> parseJson(json: String, kClass: TypeToken<C>): Map<F, S> {
-        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
+    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> parseJson(json: String, typeToken: TypeToken<C>): Map<F, S?> {
+        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
     }
 }
