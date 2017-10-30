@@ -116,7 +116,12 @@ class JsonDeserializer {
                 } else {
                     val typeAdapter = getTypeAdapter(memberKClass, typeAdapterMap)
                     if (typeAdapter != null) {
-                        val obj = typeAdapter.read(memberKClass, jsonObject, jsonKey, config)
+                        val obj: Any?
+                        if (jsonObject.get(jsonKey).toString().equals("null", true)) {
+                            obj = null
+                        } else {
+                            obj = typeAdapter.read(memberKClass, jsonObject, jsonKey, config)
+                        }
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
                         } else {

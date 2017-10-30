@@ -12,10 +12,7 @@ import kotlin.reflect.full.starProjectedType
 
 
 class JsonFormatter(
-        typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>? = null,
-        dateFormat: String = DAFAULT_DATE_FORMAT
-
-) {
+        typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>? = null) {
 
     companion object {
         val DEFAULT_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
@@ -44,7 +41,6 @@ class JsonFormatter(
             putAll(it)
         }
     }
-    val mDateFormat: String = dateFormat
     val mConfig: JsonParserConfig = JsonParserConfig()
 
     fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
