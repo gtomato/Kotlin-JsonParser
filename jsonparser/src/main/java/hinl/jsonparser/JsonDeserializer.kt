@@ -19,7 +19,7 @@ class JsonDeserializer {
                 val json = jsonMap.get(key).toString()
                 val obj = parseJson(json = json, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
                 if (obj == null && !typeToken.nullableParams) {
-                    throw IllegalArgumentException("")
+                    throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
                 }
                 if (F::class.isSubclassOf(Char::class)) {
                     hashMap.put(key.single() as F, obj)
@@ -44,7 +44,7 @@ class JsonDeserializer {
                 if (typeToken.nullableParams) {
                     kList.add(obj)
                 } else {
-                    throw IllegalArgumentException("")
+                    throw IllegalArgumentException("Object in index: $index is null while variable defined is a non-nullable object")
                 }
             }
         }
@@ -96,8 +96,7 @@ class JsonDeserializer {
                     } else if (it.returnType.isMarkedNullable) {
                         param = null
                     } else {
-                        TODO("Throw Exception")
-                        throw IllegalArgumentException()
+                        throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
                     val childClass = it.returnType.arguments[1].type?.jvmErasure
@@ -125,8 +124,7 @@ class JsonDeserializer {
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
                         } else {
-                            TODO("Throw Exception")
-                            throw IllegalArgumentException()
+                            throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                         }
                     } else {
                         param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberKClass, typeAdapterMap, config)
@@ -139,8 +137,7 @@ class JsonDeserializer {
             }
         }
         if (paramsMap.isEmpty()) {
-            throw IllegalArgumentException()
-            TODO("Throw Exception")
+            throw IllegalArgumentException("No params can parse with this json: $json, please check this json string is valid")
         }
 
         return constructor?.callBy(paramsMap)
@@ -157,8 +154,7 @@ class JsonDeserializer {
         } else if (isMarkedNullable) {
             return null
         } else {
-            TODO("Throw Exception")
-            throw IllegalArgumentException()
+            throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
         }
     }
 
