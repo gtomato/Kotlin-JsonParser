@@ -12,7 +12,7 @@ data class ObjectA(val listOfObjectB: List<ObjectB>,
 
 data class ObjectB(val arrayListOfString: ArrayList<String>,
                    val arrayListOfInt: ArrayList<Int>,
-                   val boolean: Boolean,
+                   val boolean: Boolean? = null,
                    val string: String = "default String",
                    val int: Int = -1)
 
