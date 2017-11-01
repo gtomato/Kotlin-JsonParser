@@ -6,6 +6,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.starProjectedType
@@ -33,6 +34,14 @@ class JsonFormatter(
         )
 
         val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")
+
+        internal fun getTypeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): TypeAdapter<*>? {
+            if (kClass.isSubclassOf(Enum::class)) {
+                return typeAdapterMap[Enum::class]
+            } else {
+                return typeAdapterMap[kClass]
+            }
+        }
     }
 
     val mTypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>().apply {

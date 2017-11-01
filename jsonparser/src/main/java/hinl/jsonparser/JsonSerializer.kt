@@ -44,7 +44,7 @@ internal class JsonSerializer {
                 obj.iterator().forEach {
                     val key = it.key?.toString() ?: "null"
                     val value = it.value
-                    val typeAdapter = if (value != null) typeAdapters[value::class] as? TypeAdapter<Any> else null
+                    val typeAdapter = if (value != null) JsonFormatter.getTypeAdapter(value::class, typeAdapters) as? TypeAdapter<Any> else null
                     createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
                 }
                 jsonWriter.endObject()
@@ -108,21 +108,26 @@ internal class JsonSerializer {
     }
 
     private fun createJsonObject(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig) {
-        jsonWriter.beginObject()
-        obj::class.memberProperties.forEachIndexed { index, it ->
-            try {
-                val schema = it.javaField?.annotations?.find { it is Schema } as? Schema
-                if (schema?.Serializable == true || schema == null) {
-                    val key = schema?.JsonName ?: it.name
-                    val typeAdapter = typeAdapters[it.returnType.jvmErasure] as? TypeAdapter<Any>
-                    val value = it.getter.call(obj)
-                    createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
+        val typeAdapter = JsonFormatter.getTypeAdapter(obj::class, typeAdapters) as? TypeAdapter<Any>
+        if (typeAdapter != null) {
+            typeAdapter.write(jsonWriter, obj, config)
+        } else {
+            jsonWriter.beginObject()
+            obj::class.memberProperties.forEachIndexed { index, it ->
+                try {
+                    val schema = it.javaField?.annotations?.find { it is Schema } as? Schema
+                    if (schema?.Serializable == true || schema == null) {
+                        val key = schema?.JsonName ?: it.name
+                        val typeAdapter = JsonFormatter.getTypeAdapter(it.returnType.jvmErasure, typeAdapters) as? TypeAdapter<Any>
+                        val value = it.getter.call(obj)
+                        createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
+                    }
+                } catch (e: Exception) {
+                    Log.e("JsonSerializer", "Error in $index, key = ${it.name}", e)
                 }
-            } catch (e: Exception) {
-                Log.e("JsonSerializer", "Error in $index, key = ${it.name}", e)
             }
+            jsonWriter.endObject()
         }
-        jsonWriter.endObject()
     }
 
     private fun createNode(jsonWriter: JsonWriter, key: String, value: Any?, typeAdapter: TypeAdapter<Any>?, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig) {

@@ -6,6 +6,5 @@
 /captures
 .externalNativeBuild
 **/androidTest
-**/test
 **/build
 .idea

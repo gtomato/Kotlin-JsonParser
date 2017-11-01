@@ -58,7 +58,7 @@ class JsonDeserializer {
         if (json.equals("null", true)) {
             return null
         }
-        val typeAdapter = getTypeAdapter(kClass, typeAdapterMap)
+        val typeAdapter = JsonFormatter.getTypeAdapter(kClass, typeAdapterMap)
         if (typeAdapter != null) {
             return typeAdapter.read(kClass = kClass, json = json, config = config) as T?
         }
@@ -113,7 +113,7 @@ class JsonDeserializer {
                         param = null
                     }
                 } else {
-                    val typeAdapter = getTypeAdapter(memberKClass, typeAdapterMap)
+                    val typeAdapter = JsonFormatter.getTypeAdapter(memberKClass, typeAdapterMap)
                     if (typeAdapter != null) {
                         val obj: Any?
                         if (jsonObject.get(jsonKey).toString().equals("null", true)) {
@@ -155,14 +155,6 @@ class JsonDeserializer {
             return null
         } else {
             throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
-        }
-    }
-
-    private fun getTypeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): TypeAdapter<*>? {
-        if (kClass.isSubclassOf(Enum::class)) {
-            return typeAdapterMap[Enum::class]
-        } else {
-            return typeAdapterMap[kClass]
         }
     }
 }
