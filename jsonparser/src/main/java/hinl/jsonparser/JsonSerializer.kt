@@ -4,7 +4,6 @@ import android.util.JsonWriter
 import android.util.Log
 import java.io.StringWriter
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
@@ -14,7 +13,7 @@ import kotlin.reflect.jvm.jvmErasure
  */
 internal class JsonSerializer {
 
-    internal fun serialize(obj: Any, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): String {
+    internal fun serialize(obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig): String {
         // for obj is a single object
         val stringWriter = StringWriter()
         val jsonWriter = JsonWriter(stringWriter)
@@ -23,7 +22,7 @@ internal class JsonSerializer {
         return stringWriter.toString()
     }
 
-    private fun checkForClass(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig) {
+    private fun checkForClass(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig) {
 
         when (obj) {
             is Collection<*> -> {
@@ -44,7 +43,7 @@ internal class JsonSerializer {
                 obj.iterator().forEach {
                     val key = it.key?.toString() ?: "null"
                     val value = it.value
-                    val typeAdapter = if (value != null) JsonFormatter.getTypeAdapter(value::class, typeAdapters) as? TypeAdapter<Any> else null
+                    val typeAdapter = if (value != null) JsonFormatter.getSerializeAdapter(value::class, typeAdapters) as? SerializeAdapter<Any> else null
                     createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
                 }
                 jsonWriter.endObject()
@@ -107,8 +106,8 @@ internal class JsonSerializer {
 //        }
     }
 
-    private fun createJsonObject(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig) {
-        val typeAdapter = JsonFormatter.getTypeAdapter(obj::class, typeAdapters) as? TypeAdapter<Any>
+    private fun createJsonObject(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig) {
+        val typeAdapter = JsonFormatter.getSerializeAdapter(obj::class, typeAdapters) as? SerializeAdapter<Any>
         if (typeAdapter != null) {
             typeAdapter.write(jsonWriter, obj, config)
         } else {
@@ -118,7 +117,7 @@ internal class JsonSerializer {
                     val schema = it.javaField?.annotations?.find { it is Schema } as? Schema
                     if (schema?.Serializable == true || schema == null) {
                         val key = schema?.JsonName ?: it.name
-                        val typeAdapter = JsonFormatter.getTypeAdapter(it.returnType.jvmErasure, typeAdapters) as? TypeAdapter<Any>
+                        val typeAdapter = JsonFormatter.getSerializeAdapter(it.returnType.jvmErasure, typeAdapters) as? SerializeAdapter<Any>
                         val value = it.getter.call(obj)
                         createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
                     }
@@ -130,7 +129,7 @@ internal class JsonSerializer {
         }
     }
 
-    private fun createNode(jsonWriter: JsonWriter, key: String, value: Any?, typeAdapter: TypeAdapter<Any>?, typeAdapters: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig) {
+    private fun createNode(jsonWriter: JsonWriter, key: String, value: Any?, typeAdapter: SerializeAdapter<Any>?, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig) {
         jsonWriter.name(key)
         if (typeAdapter != null) {
             typeAdapter.write(

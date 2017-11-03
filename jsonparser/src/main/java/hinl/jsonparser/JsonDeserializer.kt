@@ -1,6 +1,5 @@
 package hinl.jsonparser
 
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.reflect.KClass
@@ -11,7 +10,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 class JsonDeserializer {
 
-    inline fun <reified F, reified S: Any, reified C: Map<F, S?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Map<F, S?> {
+    inline fun <reified F, reified S: Any, reified C: Map<F, S?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Map<F, S?> {
         checkKClassValid(S::class)
         if (F::class.isSubclassOf(CharSequence::class) || F::class.isSubclassOf(Char::class)) {
             val hashMap = hashMapOf<F, S?>()
@@ -34,7 +33,7 @@ class JsonDeserializer {
         }
     }
 
-    inline fun <reified T: Any, reified C: Collection<T?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Collection<T?>? {
+    inline fun <reified T: Any, reified C: Collection<T?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Collection<T?>? {
         checkKClassValid(T::class)
         val kList = ArrayList<T?>()
         val jsonArr = JSONArray(json)
@@ -56,14 +55,21 @@ class JsonDeserializer {
         return kList
     }
 
-    fun <T : Any> parseJson(json: String, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): T? {
+    fun <T : Any> parseJson(json: String, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): T? {
         checkKClassValid(kClass)
         if (json.equals("null", true)) {
             return null
         }
-        val typeAdapter = JsonFormatter.getTypeAdapter(kClass, typeAdapterMap)
+        val typeAdapter = JsonFormatter.getDeserializeAdapter(kClass, typeAdapterMap)
         if (typeAdapter != null) {
-            return typeAdapter.read(kClass = kClass, json = json, config = config) as T?
+            when (typeAdapter) {
+                is TypeAdapter -> {
+                    return typeAdapter.read(kClass = kClass, json = json, config = config) as T?
+                }
+                else -> {
+                    return typeAdapter.read(json, config) as T?
+                }
+            }
         }
         val constructor = kClass.primaryConstructor
         val paramsMap = hashMapOf<KParameter, Any?>()
@@ -118,13 +124,20 @@ class JsonDeserializer {
                         param = null
                     }
                 } else {
-                    val memberTypeAdapter = JsonFormatter.getTypeAdapter(memberKClass, typeAdapterMap)
+                    val memberTypeAdapter = JsonFormatter.getDeserializeAdapter(memberKClass, typeAdapterMap)
                     if (memberTypeAdapter != null) {
                         val obj: Any?
                         if (jsonObject.get(jsonKey).toString().equals("null", true)) {
                             obj = null
                         } else {
-                            obj = memberTypeAdapter.read(memberKClass, jsonObject, jsonKey, config)
+                            when (memberTypeAdapter) {
+                                is TypeAdapter -> {
+                                    obj =  memberTypeAdapter.read(memberKClass, jsonObject, jsonKey, config)
+                                }
+                                else -> {
+                                    obj =  memberTypeAdapter.read(jsonObject, jsonKey, config)
+                                }
+                            }
                         }
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
@@ -161,7 +174,7 @@ class JsonDeserializer {
                                    jsonObject: JSONObject,
                                    jsonKey: String,
                                    kClass: KClass<*>,
-                                   typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Any? {
+                                   typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Any? {
         if (jsonObject.has(jsonKey) && !jsonObject.isNull(jsonKey)) {
             return parseJson(jsonObject[jsonKey].toString(), kClass, typeAdapterMap, config)
         } else if (isMarkedNullable) {

@@ -1,19 +1,16 @@
 package hinl.jsonparser
 
-import android.util.Log
 import hinl.jsonparser.typeadapter.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.full.starProjectedType
 
 
 class JsonFormatter(
-        typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>? = null,
+        deserializeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>? = null,
+        serializeAdapterMap: HashMap<KClass<*>, SerializeAdapter<*>>? = null,
         config: JsonParserConfig = JsonParserConfig()) {
 
     companion object {
@@ -36,7 +33,15 @@ class JsonFormatter(
 
         val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
 
-        internal fun getTypeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): TypeAdapter<*>? {
+        internal fun getDeserializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): DeserializeAdapter<*>? {
+            if (kClass.isSubclassOf(Enum::class)) {
+                return typeAdapterMap[Enum::class]
+            } else {
+                return typeAdapterMap[kClass]
+            }
+        }
+
+        internal fun getSerializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, SerializeAdapter<*>>): SerializeAdapter<*>? {
             if (kClass.isSubclassOf(Enum::class)) {
                 return typeAdapterMap[Enum::class]
             } else {
@@ -45,27 +50,34 @@ class JsonFormatter(
         }
     }
 
-    val mTypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>().apply {
+    val mDeserializeAdapterMap = hashMapOf<KClass<*>, DeserializeAdapter<*>>().apply {
         putAll(DEFAULT_TypeAdapterMap)
-        typeAdapterMap?.let {
+        deserializeAdapterMap?.let {
+            putAll(it)
+        }
+    }
+
+    val mSerializeAdapterMap = hashMapOf<KClass<*>, SerializeAdapter<*>>().apply {
+        putAll(DEFAULT_TypeAdapterMap)
+        serializeAdapterMap?.let {
             putAll(it)
         }
     }
     val mConfig: JsonParserConfig = config
 
-    fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
-        return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
+    fun toJson(obj: Any): String {
+        return JsonSerializer().serialize(obj, mSerializeAdapterMap, mConfig)
     }
 
-    fun toJson(obj: Any): String {
-        return JsonSerializer().serialize(obj, JsonFormatter.DEFAULT_TypeAdapterMap, mConfig)
+    fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
+        return JsonDeserializer().parseJson(json, kClass, mDeserializeAdapterMap, mConfig)
     }
 
     inline fun <reified T: Any, reified C: Collection<T?>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T?>? {
-        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
+        return JsonDeserializer().parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 
     inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> parseJson(json: String, typeToken: TypeToken<C>): Map<F, S?> {
-        return JsonDeserializer().parseJson(json, typeToken, mTypeAdapterMap, mConfig)
+        return JsonDeserializer().parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 }
