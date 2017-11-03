@@ -16,8 +16,8 @@ class JsonDeserializer {
             val hashMap = hashMapOf<F, S?>()
             val jsonMap = JSONObject(json)
             for (key in jsonMap.keys()) {
-                val json = jsonMap.get(key).toString()
-                val obj = parseJson(json = json, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
+                val objJson = jsonMap.get(key).toString()
+                val obj = parseJson(json = objJson, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
                 if (obj == null && !typeToken.nullableParams) {
                     throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
                 }
@@ -77,7 +77,7 @@ class JsonDeserializer {
             } else {
                 it.name
             }
-            var param: Any?
+            val param: Any?
             if (jsonObject.has(jsonKey)) {
                 if (memberKClass.isSubclassOf(Collection::class)) {
                     val jsonArr = JSONArray(jsonObject[jsonKey].toString())
@@ -104,8 +104,8 @@ class JsonDeserializer {
                     if (childClass != null) {
                         val jsonMap = jsonObject.getJSONObject(jsonKey)
                         for (key in jsonMap.keys()) {
-                            val json = jsonMap.get(key).toString()
-                            val obj = parseJson(json, childClass, typeAdapterMap, config)
+                            val objJson = jsonMap.get(key).toString()
+                            val obj = parseJson(objJson, childClass, typeAdapterMap, config)
                             hashMap.put(key, obj)
                         }
                         param = hashMap
@@ -113,13 +113,13 @@ class JsonDeserializer {
                         param = null
                     }
                 } else {
-                    val typeAdapter = JsonFormatter.getTypeAdapter(memberKClass, typeAdapterMap)
-                    if (typeAdapter != null) {
+                    val memberTypeAdapter = JsonFormatter.getTypeAdapter(memberKClass, typeAdapterMap)
+                    if (memberTypeAdapter != null) {
                         val obj: Any?
                         if (jsonObject.get(jsonKey).toString().equals("null", true)) {
                             obj = null
                         } else {
-                            obj = typeAdapter.read(memberKClass, jsonObject, jsonKey, config)
+                            obj = memberTypeAdapter.read(memberKClass, jsonObject, jsonKey, config)
                         }
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
