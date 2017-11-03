@@ -11,7 +11,7 @@ import kotlin.reflect.jvm.jvmErasure
 /**
  * Created by wingy26 on 23/10/2017.
  */
-internal class JsonSerializer {
+class JsonSerializer {
 
     internal fun serialize(obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig): String {
         // for obj is a single object

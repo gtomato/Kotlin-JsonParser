@@ -64,20 +64,22 @@ class JsonFormatter(
         }
     }
     val mConfig: JsonParserConfig = config
+    val mJsonDeserializer = JsonDeserializer()
+    val mJsonSerializer = JsonSerializer()
 
     fun toJson(obj: Any): String {
-        return JsonSerializer().serialize(obj, mSerializeAdapterMap, mConfig)
+        return mJsonSerializer.serialize(obj, mSerializeAdapterMap, mConfig)
     }
 
     fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
-        return JsonDeserializer().parseJson(json, kClass, mDeserializeAdapterMap, mConfig)
+        return mJsonDeserializer.parseJson(json, kClass, mDeserializeAdapterMap, mConfig)
     }
 
     inline fun <reified T: Any, reified C: Collection<T?>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T?>? {
-        return JsonDeserializer().parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
+        return mJsonDeserializer.parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 
     inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> parseJson(json: String, typeToken: TypeToken<C>): Map<F, S?> {
-        return JsonDeserializer().parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
+        return mJsonDeserializer.parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 }
