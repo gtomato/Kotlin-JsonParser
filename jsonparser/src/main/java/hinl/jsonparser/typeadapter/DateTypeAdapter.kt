@@ -14,7 +14,7 @@ import java.util.*
 
 class DateTypeAdapter : TypeAdapter<Date>() {
     override fun write(output: JsonWriter, value: Date?, config: JsonParserConfig): JsonWriter {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
         val dateString = try {
             formatter.format(value)
         } catch (e: Exception) {
@@ -24,7 +24,7 @@ class DateTypeAdapter : TypeAdapter<Date>() {
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Date? {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
         val dateString = input.getString(key)
 
         return try {
@@ -35,7 +35,7 @@ class DateTypeAdapter : TypeAdapter<Date>() {
     }
 
     override fun read(json: String, config: JsonParserConfig): Date? {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
 
         return try {
             formatter.parse(json)
@@ -47,7 +47,7 @@ class DateTypeAdapter : TypeAdapter<Date>() {
 
 class CalendarTypeAdapter : TypeAdapter<Calendar>() {
     override fun write(output: JsonWriter, value: Calendar?, config: JsonParserConfig): JsonWriter {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
         val dateString = try {
             formatter.format(value?.time)
         } catch (e: Exception) {
@@ -57,7 +57,7 @@ class CalendarTypeAdapter : TypeAdapter<Calendar>() {
     }
 
     override fun read(input: JSONObject, key: String, config: JsonParserConfig): Calendar? {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
         val dateString = input.getString(key)
 
         return try {
@@ -70,7 +70,7 @@ class CalendarTypeAdapter : TypeAdapter<Calendar>() {
     }
 
     override fun read(json: String, config: JsonParserConfig): Calendar? {
-        val formatter = SimpleDateFormat(config.dataFormat)
+        val formatter = SimpleDateFormat(config.dateFormat)
 
         return try {
             Calendar.getInstance().apply {

@@ -13,7 +13,8 @@ import kotlin.reflect.full.starProjectedType
 
 
 class JsonFormatter(
-        typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>? = null) {
+        typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>? = null,
+        config: JsonParserConfig = JsonParserConfig()) {
 
     companion object {
         val DEFAULT_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
@@ -33,7 +34,7 @@ class JsonFormatter(
                 Calendar::class to CalendarTypeAdapter()
         )
 
-        val DAFAULT_DATE_FORMAT = ""//TODO("DateFormate")
+        val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
 
         internal fun getTypeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>): TypeAdapter<*>? {
             if (kClass.isSubclassOf(Enum::class)) {
@@ -50,10 +51,14 @@ class JsonFormatter(
             putAll(it)
         }
     }
-    val mConfig: JsonParserConfig = JsonParserConfig()
+    val mConfig: JsonParserConfig = config
 
     fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
         return JsonDeserializer().parseJson(json, kClass, mTypeAdapterMap, mConfig)
+    }
+
+    fun toJson(obj: Any): String {
+        return JsonSerializer().serialize(obj, JsonFormatter.DEFAULT_TypeAdapterMap, mConfig)
     }
 
     inline fun <reified T: Any, reified C: Collection<T?>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T?>? {

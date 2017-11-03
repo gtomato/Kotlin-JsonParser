@@ -12,6 +12,7 @@ import kotlin.reflect.jvm.jvmErasure
 class JsonDeserializer {
 
     inline fun <reified F, reified S: Any, reified C: Map<F, S?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Map<F, S?> {
+        checkKClassValid(S::class)
         if (F::class.isSubclassOf(CharSequence::class) || F::class.isSubclassOf(Char::class)) {
             val hashMap = hashMapOf<F, S?>()
             val jsonMap = JSONObject(json)
@@ -34,6 +35,7 @@ class JsonDeserializer {
     }
 
     inline fun <reified T: Any, reified C: Collection<T?>>parseJson(json: String, typeToken: TypeToken<C>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): Collection<T?>? {
+        checkKClassValid(T::class)
         val kList = ArrayList<T?>()
         val jsonArr = JSONArray(json)
         for (index in 0..jsonArr.length() - 1) {
@@ -55,6 +57,7 @@ class JsonDeserializer {
     }
 
     fun <T : Any> parseJson(json: String, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, TypeAdapter<*>>, config: JsonParserConfig): T? {
+        checkKClassValid(kClass)
         if (json.equals("null", true)) {
             return null
         }
@@ -86,6 +89,7 @@ class JsonDeserializer {
                         for (index in 0..jsonArr.length() - 1) {
                             val childClass = it.returnType.arguments[0].type?.jvmErasure
                             if (childClass != null) {
+                                checkKClassValid(childClass)
                                 val obj = parseJson(jsonArr[index].toString(), childClass, typeAdapterMap, config)
                                 if (obj != null) {
                                     memberList.add(obj)
@@ -100,8 +104,9 @@ class JsonDeserializer {
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
                     val childClass = it.returnType.arguments[1].type?.jvmErasure
-                    val hashMap = hashMapOf<String, Any?>()
                     if (childClass != null) {
+                        checkKClassValid(childClass)
+                        val hashMap = hashMapOf<String, Any?>()
                         val jsonMap = jsonObject.getJSONObject(jsonKey)
                         for (key in jsonMap.keys()) {
                             val objJson = jsonMap.get(key).toString()
@@ -141,6 +146,14 @@ class JsonDeserializer {
         }
 
         return constructor?.callBy(paramsMap)
+    }
+
+    inline fun checkKClassValid(kClass: KClass<*>) {
+        when (kClass) {
+            Any::class -> {
+                throw IllegalArgumentException("kotlin.Any class is not support Json Deserialize with this library")
+            }
+        }
     }
 
 

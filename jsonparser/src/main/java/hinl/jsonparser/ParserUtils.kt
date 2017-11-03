@@ -12,7 +12,7 @@ annotation class Schema(val JsonName: String = "",
                         val DeSerializable: Boolean = true)
 
 fun Any.toJson(): String {
-    return JsonSerializer().serialize(this, JsonFormatter.DEFAULT_TypeAdapterMap, JsonParserConfig())
+    return JsonFormatter().toJson(this)
 }
 
 
