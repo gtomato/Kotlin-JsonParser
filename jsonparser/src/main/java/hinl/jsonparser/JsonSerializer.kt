@@ -114,7 +114,7 @@ class JsonSerializer {
             jsonWriter.beginObject()
             obj::class.memberProperties.forEachIndexed { index, it ->
                 try {
-                    val schema = it.javaField?.annotations?.find { it is Schema } as? Schema
+                    val schema = it.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat
                     if (schema?.Serializable == true || schema == null) {
                         val key = schema?.JsonName ?: it.name
                         val typeAdapter = JsonFormatter.getSerializeAdapter(it.returnType.jvmErasure, typeAdapters) as? SerializeAdapter<Any>

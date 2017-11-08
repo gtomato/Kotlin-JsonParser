@@ -76,9 +76,12 @@ class JsonDeserializer {
         val members = kClass.memberProperties
         val jsonObject = JSONObject(json)
 
+        val kParamList = ArrayList<KParameter>()
         members.forEach {
-            if (!it.isDeSerializable()) {
-                return@forEach
+
+            val kParams = constructor?.findParameterByName(it.name) ?: return@forEach
+            if (!kParams.isOptional) {
+                kParamList.add(kParams)
             }
             val memberKClass = it.returnType.jvmErasure
             val jsonKey = if (it.getJsonName().isNotEmpty()) {
@@ -148,7 +151,6 @@ class JsonDeserializer {
                         param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberKClass, typeAdapterMap, config)
                     }
                 }
-                val kParams = constructor?.findParameterByName(it.name)
                 if (kParams != null) {
                     paramsMap.put(kParams, param)
                 }
@@ -156,6 +158,22 @@ class JsonDeserializer {
         }
         if (paramsMap.isEmpty()) {
             throw IllegalArgumentException("No params can parse with this json: $json, please check this json string is valid")
+        }
+        val missingParams = ArrayList<KParameter>();
+        for (kParam in kParamList) {
+            if (!paramsMap.containsKey(kParam)) {
+                missingParams.add(kParam)
+            }
+        }
+
+        if (!missingParams.isEmpty()) {
+            val stringBuilder = StringBuilder("Object Class: ${kClass.simpleName}\n")
+            missingParams.forEach {
+                stringBuilder.append("Param : ${it.name}\n")
+            }
+            stringBuilder.append("is(are) missing, please check json String and/or Object Structure.")
+
+            throw IllegalArgumentException(stringBuilder.toString())
         }
 
         return constructor?.callBy(paramsMap)

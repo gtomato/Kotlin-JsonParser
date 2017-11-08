@@ -7,9 +7,9 @@ import kotlin.reflect.jvm.javaField
 
 @Target (AnnotationTarget.FIELD)
 @Retention (AnnotationRetention.RUNTIME)
-annotation class Schema(val JsonName: String = "",
-                        val Serializable: Boolean = true,
-                        val DeSerializable: Boolean = true)
+annotation class JsonFormat(val JsonName: String = "",
+                            val Serializable: Boolean = true,
+                            val Deserializable: Boolean = true)
 
 fun Any.toJson(): String {
     return JsonFormatter().toJson(this)
@@ -29,7 +29,7 @@ inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> String.parseJ
 }
 
 internal fun KProperty1<*, *>.getJsonName(): String {
-    val schema = (this.javaField?.annotations?.find { it is Schema } as? Schema)
+    val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null) {
         return schema.JsonName
     } else {
@@ -38,9 +38,9 @@ internal fun KProperty1<*, *>.getJsonName(): String {
 }
 
 internal fun KProperty1<*, *>.isDeSerializable(): Boolean {
-    val schema = (this.javaField?.annotations?.find { it is Schema } as? Schema)
+    val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null) {
-        return schema.DeSerializable
+        return schema.Deserializable
     } else {
         return true
     }
