@@ -28,19 +28,28 @@ inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> String.parseJ
     return JsonFormatter().parseJson(this, typeToken)
 }
 
-internal fun KProperty1<*, *>.getJsonName(): String {
+internal fun KProperty1<*, *>.getJsonName(): String? {
     val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
-    if (schema != null) {
+    if (schema != null && schema.JsonName.isNotEmpty()) {
         return schema.JsonName
     } else {
-        return ""
+        return null
     }
 }
 
-internal fun KProperty1<*, *>.isDeSerializable(): Boolean {
+internal fun KProperty1<*, *>.isDeserializable(): Boolean {
     val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null) {
         return schema.Deserializable
+    } else {
+        return true
+    }
+}
+
+internal fun KProperty1<*, *>.isSerializable(): Boolean {
+    val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
+    if (schema != null) {
+        return schema.Serializable
     } else {
         return true
     }

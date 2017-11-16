@@ -79,16 +79,15 @@ class JsonDeserializer {
         val kParamList = ArrayList<KParameter>()
         members.forEach {
 
+            if (!it.isDeserializable()) {
+                return@forEach
+            }
             val kParams = constructor?.findParameterByName(it.name) ?: return@forEach
             if (!kParams.isOptional) {
                 kParamList.add(kParams)
             }
             val memberKClass = it.returnType.jvmErasure
-            val jsonKey = if (it.getJsonName().isNotEmpty()) {
-                it.getJsonName()
-            } else {
-                it.name
-            }
+            val jsonKey = it.getJsonName() ?: it.name
             val param: Any?
             if (jsonObject.has(jsonKey)) {
                 if (memberKClass.isSubclassOf(Collection::class)) {
@@ -159,7 +158,7 @@ class JsonDeserializer {
         if (paramsMap.isEmpty()) {
             throw IllegalArgumentException("No params can parse with this json: $json, please check this json string is valid")
         }
-        val missingParams = ArrayList<KParameter>();
+        val missingParams = ArrayList<KParameter>()
         for (kParam in kParamList) {
             if (!paramsMap.containsKey(kParam)) {
                 missingParams.add(kParam)

@@ -17,6 +17,7 @@ class JsonDeserializerTest {
 
     var mTestingString = "Testing String A"
 
+
     val classAJson = """{
   "stringA": "Testing String",
   "innerClassA": {
@@ -226,6 +227,71 @@ class JsonDeserializerTest {
             )
     )
 
+
+    val annotationClassAJson = """{
+            "jsonNameString" : "JsonName",
+            "nonDeserializableString": "nonDeserializableString",
+            "InnerClassA": [
+                {
+                    "InnerStringA": "InnerStringAA",
+                    "nonDeserializableString": "nonDeserializableStringAA",
+                    "listOfString": ["String1", "String2", "String3"]
+                },
+                {
+                    "InnerStringA": "InnerStringAB",
+                    "nonDeserializableString": "nonDeserializableStringAB",
+                    "listOfString": ["String1", "String2","String155"]
+                },
+                {
+                    "InnerStringA": "InnerStringAC",
+                    "nonDeserializableString": "nonDeserializableStringAC",
+                    "listOfString": ["String1", "String2"]
+                }
+            ],
+            "noAnnotationString": "noAnnotationString",
+            "deserializableTrueString": "deserializableTrueString",
+            "InnerClassANotDeserializable": [
+                {
+                    "InnerStringA": "InnerStringAA",
+                    "nonDeserializableString": "nonDeserializableStringAA",
+                    "listOfString": ["String1", "String2"]
+                },
+                {
+                    "InnerStringA": "InnerStringAB",
+                    "nonDeserializableString": "nonDeserializableStringAB",
+                    "listOfString": ["String1", "String2"]
+                }
+            ]
+        }
+    """
+
+    val annotationClassAObj = TestingClassWithAnnotationA(
+            "JsonName",
+            "stringB",
+            arrayListOf(
+                    TestingInnerClassWithAnnotationA(
+                            stringA = "InnerStringAA",
+                            stringArr = arrayListOf(
+                                    "String1", "String2", "String3"
+                            )
+                    ),
+                    TestingInnerClassWithAnnotationA(
+                            stringA = "InnerStringAB",
+                            stringArr = arrayListOf(
+                                    "String1", "String2","String155"
+                            )
+                    ),
+                    TestingInnerClassWithAnnotationA(
+                            stringA = "InnerStringAC",
+                            stringArr = arrayListOf(
+                                    "String1", "String2"
+                            )
+                    )
+            ),
+            "noAnnotationString",
+            "deserializableTrueString"
+    )
+
     @Before
     fun setUp() {
         jsonDeserializer = JsonDeserializer()
@@ -246,6 +312,28 @@ class JsonDeserializerTest {
         assertEquals(jsonDeserializer.parseJson(classAJson, TestingClassA::class, mTypeAdapterMap, mConfig), classAObj)
     }
 
+    @Test
+    fun parseComplexObjectWithAnnotation() {
+        assertEquals(jsonDeserializer.parseJson(annotationClassAJson, TestingClassWithAnnotationA::class, mTypeAdapterMap, mConfig),
+                annotationClassAObj)
+    }
+    data class TestingClassWithAnnotationA(@JsonFormat(JsonName = "jsonNameString")
+                                           val stringA: String,
+                                           @JsonFormat(JsonName = "nonDeserializableString", Deserializable = false)
+                                           val stringB: String = "stringB",
+                                           @JsonFormat(JsonName = "InnerClassA")
+                                           val listOfInnerClassA: List<TestingInnerClassWithAnnotationA>,
+                                           val noAnnotationString: String,
+                                           @JsonFormat(Deserializable = true)
+                                           val deserializableTrueString: String,
+                                           @JsonFormat(JsonName = "InnerClassANotDeserializable", Deserializable = false)
+                                           val listOfInnerClassANotDeserialize: List<TestingInnerClassWithAnnotationA> = ArrayList())
+
+    data class TestingInnerClassWithAnnotationA(@JsonFormat(JsonName = "InnerStringA")
+                                                val stringA: String,
+                                                @JsonFormat(JsonName = "nonDeserializableString", Deserializable = false)
+                                                val stringB: String = "stringB",
+                                                @JsonFormat(JsonName = "listOfString") val stringArr: ArrayList<String>)
     data class TestingClassB(val stringA: String,
                              val intA: Int)
 

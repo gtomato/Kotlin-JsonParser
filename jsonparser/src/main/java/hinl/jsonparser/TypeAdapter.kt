@@ -6,9 +6,6 @@ import org.json.JSONObject
 import kotlin.reflect.KClass
 
 abstract class TypeAdapter<T: Any>: SerializeAdapter<T>, DeserializeAdapter<T> {
-    protected fun getTypeAdapterMap(): Map<KClass<*>, TypeAdapter<*>> {
-        TODO("refer to the static ref of map")
-    }
 
     //    @Throws
     internal open fun read(kClass: KClass<*>, input: JSONObject, key: String, config: JsonParserConfig): T? {
