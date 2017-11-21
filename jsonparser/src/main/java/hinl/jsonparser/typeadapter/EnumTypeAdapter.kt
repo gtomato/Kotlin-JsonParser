@@ -13,21 +13,9 @@ class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
         return output.value(value?.name)
     }
 
-    override fun read(input: JSONObject, key: String, config: JsonParserConfig): Enum<*>? {
-        //Not exec function
-        return null
-    }
-
     override fun read(json: String, config: JsonParserConfig): Enum<*>? {
         //Not exec function
         return null
-    }
-
-    override fun read(kClass: KClass<*>, input: JSONObject, key: String, config: JsonParserConfig): Enum<*>? {
-        val enumString = input.getString(key)
-        return (kClass as KClass<Enum<*>>).java.enumConstants.find {
-            it.name == enumString
-        }
     }
 
     override fun read(kClass: KClass<*>, json: String, config: JsonParserConfig): Enum<*>? {

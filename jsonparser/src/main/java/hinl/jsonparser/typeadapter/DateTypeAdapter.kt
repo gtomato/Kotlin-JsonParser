@@ -23,17 +23,6 @@ class DateTypeAdapter : TypeAdapter<Date>() {
         return output.value(dateString)
     }
 
-    override fun read(input: JSONObject, key: String, config: JsonParserConfig): Date? {
-        val formatter = SimpleDateFormat(config.dateFormat)
-        val dateString = input.getString(key)
-
-        return try {
-            formatter.parse(dateString)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     override fun read(json: String, config: JsonParserConfig): Date? {
         val formatter = SimpleDateFormat(config.dateFormat)
 
@@ -54,19 +43,6 @@ class CalendarTypeAdapter : TypeAdapter<Calendar>() {
             null
         }
         return output.value(dateString)
-    }
-
-    override fun read(input: JSONObject, key: String, config: JsonParserConfig): Calendar? {
-        val formatter = SimpleDateFormat(config.dateFormat)
-        val dateString = input.getString(key)
-
-        return try {
-            Calendar.getInstance().apply {
-                time = formatter.parse(dateString)
-            }
-        } catch (e: Exception) {
-            null
-        }
     }
 
     override fun read(json: String, config: JsonParserConfig): Calendar? {

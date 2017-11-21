@@ -7,7 +7,6 @@ import android.util.Log
 import hinl.jsonparser.*
 import hinl.kotlin.jsonparser.example.model.*
 import org.json.JSONObject
-import kotlin.reflect.KClass
 
 class MainActivity : AppCompatActivity() {
 
@@ -54,18 +53,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     val abstractObjectDeserializer: DeserializeAdapter<AbstractObject> = object: DeserializeAdapter<AbstractObject> {
-        override fun read(input: JSONObject, key: String, config: JsonParserConfig): AbstractObject? {
-            if (!input.has(key) || input.isNull(key)) {
-                return null
-            }
-            val jsonObj = input.getJSONObject(key)
-            if (jsonObj.has("tag") && jsonObj.getString("tag").isNotEmpty()) {
-                val classType = jsonObj.getString("tag")
-                val jsonString = jsonObj.toString()
-                return switchJson(classType, jsonString)
-            }
-            return null
-        }
 
         override fun read(json: String, config: JsonParserConfig): AbstractObject? {
             val jsonObj = JSONObject(json)

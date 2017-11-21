@@ -6,12 +6,6 @@ import org.json.JSONObject
 import kotlin.reflect.KClass
 
 abstract class TypeAdapter<T: Any>: SerializeAdapter<T>, DeserializeAdapter<T> {
-
-    //    @Throws
-    internal open fun read(kClass: KClass<*>, input: JSONObject, key: String, config: JsonParserConfig): T? {
-        return read(input, key, config)
-    }
-
     //    @Throws
     internal open fun read(kClass: KClass<*>, json: String, config: JsonParserConfig): T? {
         return read(json, config)
@@ -25,7 +19,5 @@ interface SerializeAdapter<in T: Any> {
 
 interface DeserializeAdapter<out T: Any> {
     //    @Throws
-    fun read(input: JSONObject, key: String, config: JsonParserConfig): T?
-
     fun read(json: String, config: JsonParserConfig): T?
 }
