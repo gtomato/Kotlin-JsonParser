@@ -1,0 +1,52 @@
+{
+  "id": 1,
+  "listOfAbstractObject": [
+    {
+      "tag": "classA",
+      "ClassA": "ClassA Name 1",
+      "booleanA": true
+    },
+    {
+      "tag": "classB",
+      "bName": "ClassB Name 1",
+      "integerB": 1
+    },
+    {
+      "tag": "classC",
+      "objectC": "ClassC Name 1",
+      "listOfString": [
+        "String 1",
+        "String 2"
+      ]
+    },
+    {
+      "tag": "classA",
+      "ClassA": "ClassA Name 2",
+      "booleanA": true
+    },
+    {
+      "tag": "classA",
+      "ClassA": "ClassA Name 3",
+      "booleanA": false
+    },
+    {
+      "tag": "classC",
+      "objectC": "ClassC Name 2",
+      "listOfString": [
+        "String 3",
+        "String 4",
+        "String 5"
+      ]
+    },
+    {
+      "tag": "classB",
+      "bName": "ClassB Name 2",
+      "integerB": 2
+    },
+    {
+      "tag": "classB",
+      "bName": "ClassB Name 3",
+      "integerB": 3
+    }
+  ]
+}
