@@ -1,9 +1,7 @@
 package hinl.jsonparser
 
-import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Before
-
-import org.junit.Assert.*
 import org.junit.Test
 import kotlin.reflect.KClass
 

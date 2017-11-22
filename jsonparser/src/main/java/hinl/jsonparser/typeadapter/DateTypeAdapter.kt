@@ -3,7 +3,6 @@ package hinl.jsonparser.typeadapter
 import android.util.JsonWriter
 import hinl.jsonparser.JsonParserConfig
 import hinl.jsonparser.TypeAdapter
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -1,8 +1,7 @@
 package hinl.kotlin.jsonparser
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import hinl.jsonparser.*
 import hinl.kotlin.jsonparser.example.model.*

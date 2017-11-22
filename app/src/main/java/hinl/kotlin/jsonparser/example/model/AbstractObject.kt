@@ -1,7 +1,6 @@
 package hinl.kotlin.jsonparser.example.model
 
 import hinl.jsonparser.JsonFormat
-import kotlin.reflect.KClass
 
 
 abstract class AbstractObject {

@@ -1,9 +1,7 @@
 package hinl.kotlin.jsonparser.example.model
 
 import android.content.Context
-import android.util.Log
 import java.io.IOException
-
 
 
 data class ExampleClassA(val stringA: String,

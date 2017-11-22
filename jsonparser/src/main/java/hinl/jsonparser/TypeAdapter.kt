@@ -1,8 +1,6 @@
 package hinl.jsonparser
 
 import android.util.JsonWriter
-import org.json.JSONObject
-
 import kotlin.reflect.KClass
 
 abstract class TypeAdapter<T: Any>: SerializeAdapter<T>, DeserializeAdapter<T> {
