@@ -1,4 +1,4 @@
-package hinl.jsonparser
+package tomatobean.jsonparser
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1

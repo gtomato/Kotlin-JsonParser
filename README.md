@@ -10,7 +10,7 @@ To use Kotlin-JsonParser in gradle implemented project,
 ```
 dependencies {
 	...
-	implementation 'hinl:jsonparser:1.0'
+	implementation 'com.tomatobean:jsonparser:1.0.1'
 	...
 }
 ```
@@ -34,7 +34,7 @@ And it is also easy for parsing kotlin Object to JSON String.
 * **Hin Lai** - *Initial work*
 * **Wingy Ng** - *Initial work*
 
-See also the list of [contributors]() who participated in this project.
+See also the list of [contributors](CONTRIBUTORS.md) who participated in this project.
 
 ## License
 

@@ -6,8 +6,8 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'maven'
 
-group = 'hinl'
-version = '1.0'
+group = 'com.tomatobean'
+version = '1.0.1'
 
 uploadArchives {
     repositories {
@@ -30,7 +30,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 

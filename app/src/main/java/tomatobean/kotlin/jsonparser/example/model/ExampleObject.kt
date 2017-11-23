@@ -1,4 +1,4 @@
-package hinl.kotlin.jsonparser.example.model
+package tomatobean.kotlin.jsonparser.example.model
 
 import android.content.Context
 import java.io.IOException

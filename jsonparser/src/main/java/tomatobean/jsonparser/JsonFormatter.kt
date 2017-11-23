@@ -1,6 +1,6 @@
-package hinl.jsonparser
+package tomatobean.jsonparser
 
-import hinl.jsonparser.typeadapter.*
+import tomatobean.jsonparser.typeadapter.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*

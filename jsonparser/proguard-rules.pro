@@ -28,5 +28,5 @@
 -keep class kotlin.** { *; }
 -keep class org.jetbrains.** { *; }
 -keep class kotlin.reflect.** { *; }
--keep class hinl.jsonparser.JsonFormatter
--keep class hinl.jsonparser.* {public *;}
+-keep class tomatobean.jsonparser.JsonFormatter
+-keep class tomatobean.jsonparser.* {public *;}

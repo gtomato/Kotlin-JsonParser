@@ -1,4 +1,4 @@
-package hinl.jsonparser
+package tomatobean.jsonparser
 
 import android.util.JsonWriter
 import kotlin.reflect.KClass

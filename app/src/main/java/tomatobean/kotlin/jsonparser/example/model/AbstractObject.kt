@@ -1,6 +1,6 @@
-package hinl.kotlin.jsonparser.example.model
+package tomatobean.kotlin.jsonparser.example.model
 
-import hinl.jsonparser.JsonFormat
+import tomatobean.jsonparser.JsonFormat
 
 
 abstract class AbstractObject {

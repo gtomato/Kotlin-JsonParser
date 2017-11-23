@@ -1,10 +1,10 @@
-package hinl.kotlin.jsonparser
+package tomatobean.kotlin.jsonparser
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import hinl.jsonparser.*
-import hinl.kotlin.jsonparser.example.model.*
+import tomatobean.jsonparser.*
+import tomatobean.kotlin.jsonparser.example.model.*
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {

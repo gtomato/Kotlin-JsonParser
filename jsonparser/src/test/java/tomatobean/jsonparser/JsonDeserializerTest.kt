@@ -1,4 +1,4 @@
-package hinl.jsonparser
+package tomatobean.jsonparser
 
 import org.junit.Assert.assertEquals
 import org.junit.Before

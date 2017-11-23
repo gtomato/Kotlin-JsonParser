@@ -1,8 +1,8 @@
-package hinl.jsonparser.typeadapter
+package tomatobean.jsonparser.typeadapter
 
 import android.util.JsonWriter
-import hinl.jsonparser.JsonParserConfig
-import hinl.jsonparser.TypeAdapter
+import tomatobean.jsonparser.JsonParserConfig
+import tomatobean.jsonparser.TypeAdapter
 import kotlin.reflect.KClass
 
 

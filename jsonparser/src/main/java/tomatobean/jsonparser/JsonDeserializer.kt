@@ -1,4 +1,4 @@
-package hinl.jsonparser
+package tomatobean.jsonparser
 
 import org.json.JSONArray
 import org.json.JSONObject
