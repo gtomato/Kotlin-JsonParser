@@ -23,6 +23,16 @@ For parsing JSON String to Kotlin Object, it can be done by one line comment.
 	val kotlinObject = jsonString.parseJson(KotlinObject::class)
 ```
 
+P.S. For Json parsing, all params must be in the Primary Constructor of Kotlin Object
+
+```
+    data class KotlinObject(
+        val paramOne: String,
+        val paramTwo, Int,
+        ....
+    )
+```
+
 And it is also easy for parsing kotlin Object to JSON String.
 
 ```
