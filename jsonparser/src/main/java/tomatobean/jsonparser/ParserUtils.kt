@@ -11,23 +11,49 @@ annotation class JsonFormat(val JsonName: String = "",
                             val Serializable: Boolean = true,
                             val Deserializable: Boolean = true)
 
+/**
+ * Extension function to serialize Kotlin object to json String with default config
+ */
 fun Any.toJson(): String {
     return JsonFormatter().toJson(this)
 }
 
-
+/**
+ * Extension function to deserialize json String to Kotlin object with default config
+ *
+ * @param [kClass] The Kotlin class of target Kotlin type [T]
+ *
+ * @return [T] The instance of target Kotlin class output
+ */
 fun <T: Any> String.parseJson(kClass: KClass<T>): T? {
     return JsonFormatter().parseJson(this, kClass)
 }
 
+/**
+ * Extension function to deserialize json String to Collection of Kotlin object with default config
+ *
+ * @param [typeToken] The [TypeToken] instance with [Collection] [C] which have target Kotlin type [T] as member
+ *
+ * @return [Collection] The output instance of collection with target Kotlin class[T]
+ */
 inline fun <reified T: Any, reified C: Collection<T?>> String.parseJson(typeToken: TypeToken<C>): Collection<T?>? {
     return JsonFormatter().parseJson(this, typeToken)
 }
 
+/**
+ * Extension function to deserialize json String to Map of Kotlin object with default config
+ *
+ * @param [typeToken] The [TypeToken] instance with [Map] [C] which have target Kotlin type [F] as key, [S] as value
+ *
+ * @return [Map] The output instance of map with target Kotlin class[F] as key, kotlin class [S] as value
+ */
 inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> String.parseJson(typeToken: TypeToken<C>): Map<F, S?> {
     return JsonFormatter().parseJson(this, typeToken)
 }
 
+/**
+ * Internal function to get JsonName annotation @see[JsonFormat]
+ */
 internal fun KProperty1<*, *>.getJsonName(): String? {
     val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null && schema.JsonName.isNotEmpty()) {
@@ -37,6 +63,9 @@ internal fun KProperty1<*, *>.getJsonName(): String? {
     }
 }
 
+/**
+ * Internal function to get Deserializable annotation @see[JsonFormat]
+ */
 internal fun KProperty1<*, *>.isDeserializable(): Boolean {
     val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null) {
@@ -46,6 +75,9 @@ internal fun KProperty1<*, *>.isDeserializable(): Boolean {
     }
 }
 
+/**
+ * Internal function to get Serializable annotation @see[JsonFormat]
+ */
 internal fun KProperty1<*, *>.isSerializable(): Boolean {
     val schema = (this.javaField?.annotations?.find { it is JsonFormat } as? JsonFormat)
     if (schema != null) {
