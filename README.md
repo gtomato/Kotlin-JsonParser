@@ -113,10 +113,8 @@ For more usage example, you can reference to /app module
 
 ## Authors
 
-* **Hin Lai** - *Initial work*
-* **Wingy Ng** - *Initial work*
-
-See also the list of [contributors](CONTRIBUTORS.md) who participated in this project.
+* **[Hin Lai](https://github.com/hinls1007)** - *Initial work*
+* **[Wingy Ng](https://github.com/wingy26)** - *Initial work*
 
 ## License
 
