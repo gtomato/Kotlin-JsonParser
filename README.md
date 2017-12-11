@@ -6,9 +6,9 @@ Kotlin-JsonParser is a Kotlin library for JSON parsing. It can parse JSON string
 > One line parsing
 * you can parse json to object or object to json in one line code
 > Annotation Configuration
-* Annotation can be add for switching feature
+* Support annotation for enabling/disabling features (e.g. serialization), see also [here](#Annotation)
 > flexible custom class serialize and deserialize
-* TypeAdapter can be add for custom deserialize and serialize process
+* Support TypeAdapter for custom deserialize and serialize process, see also [here](#TypAdapter)
 
 ## Getting Started
 
@@ -47,7 +47,7 @@ And it is also easy for parsing kotlin Object to JSON String.
 ```
 
 
-
+####Annotation
 Using Annotation for config Json parsing process
 
 ```kotlin
@@ -69,7 +69,7 @@ JsonFormat class have the following params can config
 * the variable will not parse from json when it set to false (default is true)
 
 
-
+####TypAdapter
 For custom deserialize process, DeserializeAdapter and SerializeAdapter interface can implement for custom process
 
 DeserializeAdapter usage demonstration can be found in /app module 
