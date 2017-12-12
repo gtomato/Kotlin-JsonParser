@@ -1,7 +1,7 @@
 package tomatobean.jsonparser.typeadapter
 
-import android.util.JsonWriter
 import tomatobean.jsonparser.JsonParserConfig
+import tomatobean.jsonparser.JsonWriter
 import tomatobean.jsonparser.TypeAdapter
 import kotlin.reflect.KClass
 

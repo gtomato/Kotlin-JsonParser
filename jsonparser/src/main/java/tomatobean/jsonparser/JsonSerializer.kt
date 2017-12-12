@@ -1,8 +1,5 @@
 package tomatobean.jsonparser
 
-import android.util.JsonWriter
-import android.util.Log
-import java.io.StringWriter
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
@@ -14,11 +11,9 @@ class JsonSerializer {
 
     internal fun serialize(obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig): String {
         // for obj is a single object
-        val stringWriter = StringWriter()
-        val jsonWriter = JsonWriter(stringWriter)
+        val jsonWriter = JsonWriter()
         checkForClass(jsonWriter, obj, typeAdapters, config)
-        jsonWriter.close()
-        return stringWriter.toString()
+        return jsonWriter.toString()
     }
 
     private fun checkForClass(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig) {
@@ -69,7 +64,6 @@ class JsonSerializer {
                         createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
                     }
                 } catch (e: Exception) {
-                    Log.e("JsonSerializer", "Error in $index, key = ${it.name}", e)
                 }
             }
             jsonWriter.endObject()

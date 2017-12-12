@@ -1,6 +1,5 @@
 package tomatobean.jsonparser
 
-import android.util.JsonWriter
 import kotlin.reflect.KClass
 
 abstract class TypeAdapter<T: Any>: SerializeAdapter<T>, DeserializeAdapter<T> {
