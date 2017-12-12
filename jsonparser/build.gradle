@@ -6,16 +6,12 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'maven'
 
+apply plugin: 'com.github.dcendents.android-maven'
+
+apply plugin: "com.jfrog.bintray"
+
 group = 'com.tomatobean'
 version = '1.0.1'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: mavenLocal().getUrl())
-        }
-    }
-}
 
 buildscript {
     ext.kotlinVersion = '1.1.51'
@@ -57,4 +53,69 @@ dependencies {
     testImplementation "org.json:json:20140107"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+}
+
+def siteUrl = 'https://github.com/gtomato/Kotlin-JsonParser'      // Homepage URL of the library
+def gitUrl = 'https://github.com/gtomato/Kotlin-JsonParser.git'   // Git repository URL
+
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                name 'com.tomatobean:jsonparser'
+                description = 'Kotlin-JsonParser is a Kotlin library for JSON parsing. It can parse JSON string to Kotlin Object or reverse in a simple way.'
+                url siteUrl
+                licenses {
+                    license {
+                        name "The MIT License"
+                        url "http://www.opensource.org/licenses/MIT"
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'hinl1007'
+                        name 'Hin Lai'
+                        email 'hinls1007@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+// https://github.com/bintray/gradle-bintray-plugin
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = "TomatoBean"
+        // it is the name that appears in bintray when logged
+        name = "com.tomatobean:jsonparser"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["MIT"]
+        publish = true
+        version {
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
 }
