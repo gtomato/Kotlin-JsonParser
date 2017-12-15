@@ -80,7 +80,7 @@ class JsonWriter {
     }
 
     private fun checkLastElement() {
-        println("currentStateStack = $currentStateStack")
+        
         val lastElement = currentStateStack.last() ?: throw IllegalStateException("No element")
         when (lastElement) {
             JsonState.KEY -> {
@@ -108,7 +108,7 @@ class JsonWriter {
     }
 
     private fun close(type: JsonElementType) {
-        println("closing = $type")
+        
         when (type) {
             JsonElementType.KEY_VALUE -> {
                 val lastElement = currentStateStack.last() ?: throw IllegalStateException("No element")
