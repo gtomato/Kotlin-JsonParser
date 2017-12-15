@@ -1,4 +1,5 @@
-apply plugin: 'java-library'
+import proguard.gradle.ProGuardTask
+
 
 apply plugin: 'kotlin'
 
@@ -6,93 +7,114 @@ apply plugin: 'maven'
 
 //apply plugin: 'com.github.dcendents.android-maven'
 
-//apply plugin: "com.jfrog.bintray"
-
+apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.1'
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: mavenLocal().getUrl())
-        }
-    }
-}
+version = '1.0.2'
+
 buildscript {
     ext.kotlinVersion = '1.1.51'
+    ext.json_lib_version = '20171018'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-all:1.10.19'
-    testImplementation "org.json:json:20140107"
+    testImplementation "org.json:json:$json_lib_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    implementation "org.json:json:20171018"
+    implementation "org.json:json:$json_lib_version"
 
 }
 
-//def siteUrl = 'https://github.com/gtomato/Kotlin-JsonParser'      // Homepage URL of the library
-//def gitUrl = 'https://github.com/gtomato/Kotlin-JsonParser.git'   // Git repository URL
+def siteUrl = 'https://github.com/gtomato/Kotlin-JsonParser'      // Homepage URL of the library
+def gitUrl = 'https://github.com/gtomato/Kotlin-JsonParser.git'   // Git repository URL
 
 
-//install {
-//    repositories.mavenInstaller {
-//        // This generates POM.xml with proper parameters
-//        pom {
-//            project {
-//                packaging 'jar'
-//
-//                // Add your description here
-//                name 'com.tomatobean:jsonparserjar'
-//                description = 'Kotlin-JsonParser is a Kotlin library for JSON parsing. It can parse JSON string to Kotlin Object or reverse in a simple way.'
-//                url siteUrl
-//                licenses {
-//                    license {
-//                        name "The MIT License"
-//                        url "http://www.opensource.org/licenses/MIT"
-//                        distribution 'repo'
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id 'hinl1007'
-//                        name 'Hin Lai'
-//                        email 'hinls1007@gmail.com'
-//                    }
-//                }
-//                scm {
-//                    connection gitUrl
-//                    developerConnection gitUrl
-//                    url siteUrl
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//Properties properties = new Properties()
-//properties.load(project.rootProject.file('local.properties').newDataInputStream())
-//
-//// https://github.com/bintray/gradle-bintray-plugin
-//bintray {
-//    user = properties.getProperty("bintray.user")
-//    key = properties.getProperty("bintray.apikey")
-//
-//    configurations = ['archives']
-//    pkg {
-//        repo = "TomatoBean"
-//        // it is the name that appears in bintray when logged
-//        name = "com.tomatobean:jsonparserjar"
-//        websiteUrl = siteUrl
-//        vcsUrl = gitUrl
-//        licenses = ["MIT"]
-//        publish = true
-//        version {
-//            gpg {
-//                sign = true //Determines whether to GPG sign the files. The default is false
-//                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
-//            }
-//        }
-//    }
-//}
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'jar'
+
+                // Add your description here
+                name 'com.tomatobean:jsonparser'
+                description = 'Kotlin-JsonParser is a Kotlin library for JSON parsing. It can parse JSON string to Kotlin Object or reverse in a simple way.'
+                url siteUrl
+                licenses {
+                    license {
+                        name "The MIT License"
+                        url "http://www.opensource.org/licenses/MIT"
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'hinl1007'
+                        name 'Hin Lai'
+                        email 'hinls1007@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+def javaName = archivesBaseName + '-java'
+def fullJavaName = archivesBaseName + ''
+task proguard(type: ProGuardTask, dependsOn: 'build') {
+    configuration 'proguard-rules.pro'
+    ignorewarnings()
+
+    injars "$buildDir/libs/${fullJavaName}-${version}.jar"
+    outjars "$buildDir/libs/${javaName}-${version}.jar"
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+}
+task deleteOrigin(type: Delete, dependsOn: proguard) {
+    delete "$buildDir/libs/${fullJavaName}-${version}.jar"
+}
+task fixTarget(type: Copy, dependsOn: deleteOrigin) {
+    from "$buildDir/libs/${javaName}-${version}.jar"
+    into "$buildDir/libs"
+    rename { String fileName ->
+        fileName.replace('-java', '')
+    }
+}
+task deleteTemp(type: Delete, dependsOn: fixTarget) {
+    delete "$buildDir/libs/${javaName}-${version}.jar"
+}
+
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+// https://github.com/bintray/gradle-bintray-plugin
+bintray {
+    tasks.build.dependsOn 'deleteTemp'
+
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = "TomatoBean"
+        // it is the name that appears in bintray when logged
+        name = "com.tomatobean:jsonparser"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["MIT"]
+        publish = true
+        version {
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
+}

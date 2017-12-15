@@ -24,9 +24,23 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-
+-keep class java.lang.*
+-keep class org.jetbrains.*
 -keep class kotlin.** { *; }
--keep class org.jetbrains.** { *; }
--keep class kotlin.reflect.** { *; }
+-dontwarn org.jetbrains.annotations.**
+-keep class kotlin.Metadata { *; }
+-keepnames @kotlin.Metadata class tomatobean.jsonparsere.**
+-keepattributes *Annotation*
 -keep class tomatobean.jsonparser.JsonFormatter
 -keep class tomatobean.jsonparser.* {public *;}
+-keep class tomatobean.jsonparser.ParserUtils.*
+-dontwarn org.jetbrains.annotations.**
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+-keepclassmembers class * {
+    @tomatobean.jsonparser.JsonFormat <methods>;
+}
+-keepclasseswithmembers class tomatobean.jsonparser.JsonFormat.**{*;}
+
+-keepclassmembers class tomatobean.jsonparser.** { *; }
