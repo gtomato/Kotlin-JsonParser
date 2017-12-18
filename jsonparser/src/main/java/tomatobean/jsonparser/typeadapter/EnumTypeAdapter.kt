@@ -1,13 +1,18 @@
 package tomatobean.jsonparser.typeadapter
 
-import tomatobean.jsonparser.JsonParserConfig
-import tomatobean.jsonparser.JsonWriter
-import tomatobean.jsonparser.TypeAdapter
+import tomatobean.jsonparser.*
 import kotlin.reflect.KClass
 
 
 class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
     override fun write(output: JsonWriter, value: Enum<*>?, config: JsonParserConfig): JsonWriter {
+        value?.let {
+            val jsonFormat = it.javaClass.getField(it.name).annotations.find { it is JsonFormat } as? JsonFormat
+            jsonFormat?.let {
+                output.value(it.JsonName)
+                return output
+            }
+        }
         return output.value(value?.name)
     }
 
@@ -17,8 +22,19 @@ class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
     }
 
     override fun read(kClass: KClass<*>, json: String, config: JsonParserConfig): Enum<*>? {
-        return (kClass as KClass<Enum<*>>).java.enumConstants.find {
-            it.name == json
+        var enum: Enum<*>? = null
+        (kClass as KClass<Enum<*>>).java.enumConstants.forEach {
+            val jsonFormat = it.javaClass.getField(it.name).annotations.find { it is JsonFormat } as? JsonFormat
+            if (jsonFormat?.JsonName == json) {
+                enum = it
+                return@forEach
+            }
         }
+        if (enum == null) {
+            enum = kClass.java.enumConstants.find {
+                it.name == json
+            }
+        }
+        return enum
     }
 }

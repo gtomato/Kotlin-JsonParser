@@ -34,11 +34,11 @@ class JsonFormatter(
         val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
 
         internal fun getDeserializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): DeserializeAdapter<*>? {
-            if (kClass.isSubclassOf(Enum::class)) {
+            val typeAdapter = typeAdapterMap[kClass]
+            if (typeAdapter == null && kClass.isSubclassOf(Enum::class)) {
                 return typeAdapterMap[Enum::class]
-            } else {
-                return typeAdapterMap[kClass]
             }
+            return typeAdapter
         }
 
         internal fun getSerializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, SerializeAdapter<*>>): SerializeAdapter<*>? {

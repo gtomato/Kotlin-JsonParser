@@ -34,7 +34,6 @@ class JsonWriter {
     }
 
     fun endArray() {
-//        checkLastElement()
         close(JsonElementType.ARRAY)
     }
 
@@ -45,7 +44,6 @@ class JsonWriter {
     }
 
     fun endObject() {
-//        checkLastElement()
         close(JsonElementType.OBJECT)
     }
 
@@ -76,6 +74,12 @@ class JsonWriter {
             }
             close(JsonElementType.KEY_VALUE)
         }
+        return this
+    }
+
+    fun put(name: String, any: Any?): JsonWriter {
+        name(name)
+        value(any)
         return this
     }
 
