@@ -4,7 +4,9 @@ import tomatobean.jsonparser.typeadapter.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 
 
@@ -28,7 +30,12 @@ class JsonFormatter(
                 BigInteger::class to BigIntegerTypeAdapter(),
                 Enum::class to EnumTypeAdapter(),
                 Date::class to DateTypeAdapter(),
-                Calendar::class to CalendarTypeAdapter()
+                Calendar::class to CalendarTypeAdapter(),
+
+                HashMap::class to HashMapTypeAdapter(),
+                Map::class to HashMapTypeAdapter()
+//                L::class to HashMapTypeAdapter(),
+//                HashMap::class to HashMapTypeAdapter()
         )
 
         val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
@@ -87,8 +94,9 @@ class JsonFormatter(
      *
      * @return [T] The instance of Kotlin object type [T] output
      */
-    fun <T: Any> parseJson(json: String, kClass: KClass<T>): T? {
-        return mJsonDeserializer.parseJson(json, kClass, mDeserializeAdapterMap, mConfig)
+    inline fun <reified T: Any> parseJson(json: String, kClass: KClass<T>): T? {
+        val kType = object : TypeToken<T>(){}.getKTypeImpl()
+        return mJsonDeserializer.parseJson(json, kType, kClass, mDeserializeAdapterMap, mConfig)
     }
 
     /**

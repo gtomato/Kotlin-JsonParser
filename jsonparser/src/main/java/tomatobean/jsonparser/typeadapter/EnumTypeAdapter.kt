@@ -2,6 +2,8 @@ package tomatobean.jsonparser.typeadapter
 
 import tomatobean.jsonparser.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.jvm.jvmErasure
 
 
 class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
@@ -21,7 +23,8 @@ class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
         return null
     }
 
-    override fun read(kClass: KClass<*>, json: String, config: JsonParserConfig): Enum<*>? {
+    override fun read(kType: KType?, json: String, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): Enum<*>? {
+        val kClass = kType?.jvmErasure ?: return null
         var enum: Enum<*>? = null
         (kClass as KClass<Enum<*>>).java.enumConstants.forEach {
             val jsonFormat = it.javaClass.getField(it.name).annotations.find { it is JsonFormat } as? JsonFormat

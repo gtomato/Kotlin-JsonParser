@@ -25,7 +25,7 @@ fun Any.toJson(): String {
  *
  * @return [T] The instance of target Kotlin class output
  */
-fun <T: Any> String.parseJson(kClass: KClass<T>): T? {
+inline fun <reified T: Any> String.parseJson(kClass: KClass<T>): T? {
     return JsonFormatter().parseJson(this, kClass)
 }
 

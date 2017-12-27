@@ -2,13 +2,14 @@ package tomatobean.jsonparser
 
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
+import java.lang.reflect.*
+import kotlin.reflect.*
 import kotlin.reflect.full.findParameterByName
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
+import kotlin.reflect.full.createType
 
 
 class JsonDeserializer {
@@ -20,7 +21,7 @@ class JsonDeserializer {
             val jsonMap = JSONObject(json)
             for (key in jsonMap.keys()) {
                 val objJson = jsonMap.get(key).toString()
-                val obj = parseJson(json = objJson, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
+                val obj = parseJson(json = objJson, kType = typeToken.rawType, kClass = S::class, typeAdapterMap = typeAdapterMap, config = config)
                 if (obj == null && !typeToken.nullableParams) {
                     throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
                 }
@@ -41,7 +42,7 @@ class JsonDeserializer {
         val kList = ArrayList<T?>()
         val jsonArr = JSONArray(json)
         for (index in 0..jsonArr.length() - 1) {
-            val obj = parseJson(json = jsonArr[index].toString(), kClass = T::class, typeAdapterMap = typeAdapterMap, config = config)
+            val obj = parseJson(json = jsonArr[index].toString(), kType = typeToken.rawType, kClass = T::class, typeAdapterMap = typeAdapterMap, config = config)
             if (obj != null) {
                 kList.add(obj)
             } else {
@@ -58,7 +59,10 @@ class JsonDeserializer {
         return kList
     }
 
-    fun <T : Any> parseJson(json: String, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): T? {
+    fun <T : Any> parseJson(json: String, kType: KType?, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): T? {
+        if (kType == null) {
+            return null
+        }
         checkKClassValid(kClass)
         if (json.equals("null", true)) {
             return null
@@ -67,7 +71,7 @@ class JsonDeserializer {
         if (typeAdapter != null) {
             when (typeAdapter) {
                 is TypeAdapter -> {
-                    return typeAdapter.read(kClass = kClass, json = json, config = config) as T?
+                    return typeAdapter.read(kType = kType, json = json, config = config, typeAdapterMap = typeAdapterMap) as T?
                 }
                 else -> {
                     return typeAdapter.read(json, config) as T?
@@ -90,6 +94,7 @@ class JsonDeserializer {
                 kParamList.add(kParams)
             }
             val memberKClass = it.returnType.jvmErasure
+            val memberType = it.returnType
             val jsonKey = it.getJsonName() ?: it.name
             val param: Any?
             if (jsonObject.has(jsonKey)) {
@@ -98,10 +103,11 @@ class JsonDeserializer {
                     if (jsonArr.length() > 0) {
                         val memberList = ArrayList<Any>()
                         for (index in 0..jsonArr.length() - 1) {
+                            val childType = it.returnType.arguments[0].type
                             val childClass = it.returnType.arguments[0].type?.jvmErasure
                             if (childClass != null) {
                                 checkKClassValid(childClass)
-                                val obj = parseJson(jsonArr[index].toString(), childClass, typeAdapterMap, config)
+                                val obj = parseJson(jsonArr[index].toString(), childType, childClass, typeAdapterMap, config)
                                 if (obj != null) {
                                     memberList.add(obj)
                                 }
@@ -114,6 +120,7 @@ class JsonDeserializer {
                         throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
+                    val childType = it.returnType.arguments[1].type
                     val childClass = it.returnType.arguments[1].type?.jvmErasure
                     if (childClass != null) {
                         checkKClassValid(childClass)
@@ -121,7 +128,7 @@ class JsonDeserializer {
                         val jsonMap = jsonObject.getJSONObject(jsonKey)
                         for (key in jsonMap.keys()) {
                             val objJson = jsonMap.get(key).toString()
-                            val obj = parseJson(objJson, childClass, typeAdapterMap, config)
+                            val obj = parseJson(objJson, childType, childClass, typeAdapterMap, config)
                             hashMap.put(key, obj)
                         }
                         param = hashMap
@@ -138,7 +145,7 @@ class JsonDeserializer {
                             val jsonObjectString = jsonObject.get(jsonKey).toString()
                             when (memberTypeAdapter) {
                                 is TypeAdapter -> {
-                                    obj =  memberTypeAdapter.read(memberKClass, jsonObjectString, config)
+                                    obj =  memberTypeAdapter.read(memberType, jsonObjectString, config, typeAdapterMap)
                                 }
                                 else -> {
                                     obj =  memberTypeAdapter.read(jsonObjectString, config)
@@ -151,7 +158,7 @@ class JsonDeserializer {
                             throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                         }
                     } else {
-                        param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberKClass, typeAdapterMap, config)
+                        param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberType, memberKClass, typeAdapterMap, config)
                     }
                 }
                 if (kParams != null) {
@@ -190,22 +197,73 @@ class JsonDeserializer {
         }
     }
 
-
     private fun recursiveParseJson(isMarkedNullable: Boolean,
                                    jsonObject: JSONObject,
                                    jsonKey: String,
+                                   kType: KType,
                                    kClass: KClass<*>,
                                    typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Any? {
         if (jsonObject.has(jsonKey) && !jsonObject.isNull(jsonKey)) {
-            return parseJson(jsonObject[jsonKey].toString(), kClass, typeAdapterMap, config)
+            return parseJson(jsonObject[jsonKey].toString(), kType, kClass, typeAdapterMap, config)
         } else if (isMarkedNullable) {
             return null
         } else {
             throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
         }
     }
+
+//    private fun recursiveParseJson(isMarkedNullable: Boolean,
+//                                   jsonObject: JSONObject,
+//                                   jsonKey: String,
+//                                   kClass: KClass<*>,
+//                                   typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Any? {
+//        if (jsonObject.has(jsonKey) && !jsonObject.isNull(jsonKey)) {
+//            return parseJson(jsonObject[jsonKey].toString(), kClass, typeAdapterMap, config)
+//        } else if (isMarkedNullable) {
+//            return null
+//        } else {
+//            throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
+//        }
+//    }
 }
 
 
 
-class TypeToken<T>(val nullableParams: Boolean = false)
+open class TypeToken<T>(val nullableParams: Boolean = false) {
+    val rawType: KType = getKTypeImpl()
+}
+
+fun KClass<*>.getKTypeImpl(): KType = java.genericSuperclass.toKType().arguments.single().type!!
+
+fun TypeToken<*>.getKTypeImpl(): KType =
+        javaClass.genericSuperclass.toKType().arguments.single().type!!
+
+fun Type.toKType(): KType = toKTypeProjection().type!!
+
+fun Type.toKTypeProjection(): KTypeProjection = when (this) {
+    is Class<*> -> this.kotlin.toInvariantFlexibleProjection()
+    is ParameterizedType -> {
+        val erasure = (rawType as Class<*>).kotlin
+        erasure.toInvariantFlexibleProjection((erasure.typeParameters.zip(actualTypeArguments).map { (parameter, argument) ->
+            val projection = argument.toKTypeProjection()
+            projection.takeIf {
+                // Get rid of use-site projections on arguments, where the corresponding parameters already have a declaration-site projection
+                parameter.variance == KVariance.INVARIANT || parameter.variance != projection.variance
+            } ?: KTypeProjection.invariant(projection.type!!)
+        }))
+    }
+    is WildcardType -> when {
+        lowerBounds.isNotEmpty() -> KTypeProjection.contravariant(lowerBounds.single().toKType())
+        upperBounds.isNotEmpty() -> KTypeProjection.covariant(upperBounds.single().toKType())
+    // This looks impossible to obtain through Java reflection API, but someone may construct and pass such an instance here anyway
+        else -> KTypeProjection.STAR
+    }
+    is GenericArrayType -> Array<Any>::class.toInvariantFlexibleProjection(listOf(genericComponentType.toKTypeProjection()))
+    is TypeVariable<*> -> TODO()
+    else -> throw IllegalArgumentException("Unsupported type: $this")
+}
+
+
+fun KClass<*>.toInvariantFlexibleProjection(arguments: List<KTypeProjection> = emptyList()): KTypeProjection {
+    return KTypeProjection.invariant(createType(arguments, nullable = false))
+}

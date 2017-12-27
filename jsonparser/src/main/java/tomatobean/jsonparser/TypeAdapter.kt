@@ -1,10 +1,11 @@
 package tomatobean.jsonparser
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 
 abstract class TypeAdapter<T: Any>: SerializeAdapter<T>, DeserializeAdapter<T> {
     //    @Throws
-    internal open fun read(kClass: KClass<*>, json: String, config: JsonParserConfig): T? {
+    internal open fun read(kType: KType?, json: String, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): T? {
         return read(json, config)
     }
 }
