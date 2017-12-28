@@ -10,7 +10,8 @@ import kotlin.reflect.jvm.jvmErasure
 
 class HashMapTypeAdapter: TypeAdapter<HashMap<*, *>>() {
     override fun write(output: JsonWriter, value: HashMap<*, *>?, config: JsonParserConfig): JsonWriter {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //Not exec function
+        return output
     }
 
     override fun read(json: String, config: JsonParserConfig): HashMap<*, *>? {
@@ -18,29 +19,37 @@ class HashMapTypeAdapter: TypeAdapter<HashMap<*, *>>() {
         return null
     }
 
-    override fun read(kType: KType?, json: String, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): HashMap<*, *>? {
+    override fun read(json: String, kType: KType?, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): HashMap<*, *>? {
         if (kType == null) {
             return null
         }
 //        val kClass = kType.jvmErasure
         val jsonObj = JSONObject(json)
         val childType = kType.arguments[1].type
+        val hashMap = linkedMapOf<String, Any?>()
         if (childType?.jvmErasure?.isSubclassOf(Map::class) == true) {
-            val hashMap = hashMapOf<String, Any?>()
             for (key in jsonObj.keys()) {
-                val childJson = jsonObj.get(key).toString()
-                hashMap.put(key, read(childType, childJson, config, typeAdapterMap))
+                val childJson = jsonObj[key].toString()
+                val obj = read(childJson, childType, config, typeAdapterMap)
+                if (obj == null && !childType.isMarkedNullable) {
+                    throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
+                }
+                hashMap.put(key, obj)
             }
-            return hashMap
         } else {
-            val hashMap = hashMapOf<String, Any?>()
-            val deserializeAdapter = typeAdapterMap[childType?.jvmErasure]
             for (key in jsonObj.keys()) {
-                val childJson = jsonObj.get(key).toString()
-                hashMap.put(key, deserializeAdapter?.read(childJson, config))
+                val childJson = jsonObj[key].toString()
+                val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
+                if (obj == null && childType?.isMarkedNullable != true) {
+                    throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
+                }
+                hashMap.put(key, obj)
             }
-            return hashMap
         }
+        if (hashMap.isEmpty()) {
+            return null
+        }
+        return hashMap
     }
 }
 

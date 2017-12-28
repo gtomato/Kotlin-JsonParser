@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
 class JsonSerializerTest {
 
     private val mTypeAdapterMap = hashMapOf<KClass<*>, SerializeAdapter<*>>().apply {
-        putAll(JsonFormatter.DEFAULT_TypeAdapterMap)
+        putAll(JsonFormatter.DEFAULT_Serialize_TypeAdapterMap)
     }
     private val mConfig = JsonParserConfig()
 

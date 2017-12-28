@@ -4,12 +4,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import kotlin.reflect.KClass
+import kotlin.reflect.full.starProjectedType
 
 class JsonDeserializerTest {
 
     internal lateinit var jsonDeserializer: JsonDeserializer
     val mTypeAdapterMap = linkedMapOf<KClass<*>, DeserializeAdapter<*>>().apply {
-        putAll(JsonFormatter.DEFAULT_TypeAdapterMap)
+        putAll(JsonFormatter.DEFAULT_Deserialize_TypeAdapterMap)
     }
     val mConfig = JsonParserConfig()
 
@@ -297,22 +298,22 @@ class JsonDeserializerTest {
 
     @Test
     fun parseJsonTest() {
-        assertEquals(jsonDeserializer.parseJson(mTestingString, String::class, mTypeAdapterMap, mConfig), mTestingString)
+        assertEquals(jsonDeserializer.parseJson(mTestingString, String::class.starProjectedType, String::class, mTypeAdapterMap, mConfig), mTestingString)
     }
 
     @Test
     fun parseSimpleJsonObject() {
-        assertEquals(jsonDeserializer.parseJson("""{"stringA":"Testing Class B", "intA": 10} """, TestingClassB::class, mTypeAdapterMap, mConfig), TestingClassB("Testing Class B", 10))
+        assertEquals(jsonDeserializer.parseJson("""{"stringA":"Testing Class B", "intA": 10} """, TestingClassB::class.starProjectedType, TestingClassB::class, mTypeAdapterMap, mConfig), TestingClassB("Testing Class B", 10))
     }
 
     @Test
     fun parseComplexJsonObject() {
-        assertEquals(jsonDeserializer.parseJson(classAJson, TestingClassA::class, mTypeAdapterMap, mConfig), classAObj)
+        assertEquals(jsonDeserializer.parseJson(classAJson, TestingClassA::class.starProjectedType,  TestingClassA::class, mTypeAdapterMap, mConfig), classAObj)
     }
 
     @Test
     fun parseComplexObjectWithAnnotation() {
-        assertEquals(jsonDeserializer.parseJson(annotationClassAJson, TestingClassWithAnnotationA::class, mTypeAdapterMap, mConfig),
+        assertEquals(jsonDeserializer.parseJson(annotationClassAJson, TestingClassWithAnnotationA::class.starProjectedType, TestingClassWithAnnotationA::class, mTypeAdapterMap, mConfig),
                 annotationClassAObj)
     }
     data class TestingClassWithAnnotationA(@JsonFormat(JsonName = "jsonNameString")

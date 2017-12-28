@@ -30,33 +30,14 @@ inline fun <reified T: Any> String.parseJson(kClass: KClass<T>): T? {
     return JsonFormatter().parseJson(this, kClass)
 }
 
-inline fun <reified T: Any> String.testParseJson(): T? {
-//    if () {
-//        val classT = T::class as KClass<Collection<*>>
-//        return this.parseJson(TypeToken<T>())
-//    }
-    return JsonFormatter().parseJson(this, T::class)
-}
-
 /**
- * Extension function to deserialize json String to Collection of Kotlin object with default config
+ * Extension function to deserialize json String to Collection or Map of Kotlin object with default config
  *
  * @param [typeToken] The [TypeToken] instance with [Collection] [C] which have target Kotlin type [T] as member
  *
- * @return [Collection] The output instance of collection with target Kotlin class[T]
+ * @return [T] The output instance of collection or map with target Kotlin class[T]
  */
-inline fun <reified T: Any, reified C: Collection<T?>> String.parseJson(typeToken: TypeToken<C>): Collection<T?>? {
-    return JsonFormatter().parseJson(this, typeToken)
-}
-
-/**
- * Extension function to deserialize json String to Map of Kotlin object with default config
- *
- * @param [typeToken] The [TypeToken] instance with [Map] [C] which have target Kotlin type [F] as key, [S] as value
- *
- * @return [Map] The output instance of map with target Kotlin class[F] as key, kotlin class [S] as value
- */
-inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> String.parseJson(typeToken: TypeToken<C>): Map<F, S?> {
+inline fun <reified T: Any> String.parseJson(typeToken: TypeToken<T>): T? {
     return JsonFormatter().parseJson(this, typeToken)
 }
 

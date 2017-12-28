@@ -23,7 +23,7 @@ class EnumTypeAdapter: TypeAdapter<Enum<*>>() {
         return null
     }
 
-    override fun read(kType: KType?, json: String, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): Enum<*>? {
+    override fun read(json: String, kType: KType?, config: JsonParserConfig, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): Enum<*>? {
         val kClass = kType?.jvmErasure ?: return null
         var enum: Enum<*>? = null
         (kClass as KClass<Enum<*>>).java.enumConstants.forEach {

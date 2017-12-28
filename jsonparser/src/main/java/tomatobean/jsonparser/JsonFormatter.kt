@@ -6,7 +6,6 @@ import java.math.BigInteger
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubclassOf
 
 
@@ -16,7 +15,24 @@ class JsonFormatter(
         config: JsonParserConfig = JsonParserConfig()) {
 
     companion object {
-        val DEFAULT_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
+        val DEFAULT_Serialize_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
+                Boolean::class to BooleanTypeAdapter(),
+                CharSequence::class to CharSequenceTypeAdapter(),
+                String::class to StringTypeAdapter(),
+                Char::class to CharTypeAdapter(),
+                Int::class to IntTypeAdapter(),
+                Long::class to LongTypeAdapter(),
+                Short::class to ShortTypeAdapter(),
+                Double::class to DoubleTypeAdapter(),
+                Float::class to FloatTypeAdapter(),
+                BigDecimal::class to BigDecimalTypeAdapter(),
+                BigInteger::class to BigIntegerTypeAdapter(),
+                Enum::class to EnumTypeAdapter(),
+                Date::class to DateTypeAdapter(),
+                Calendar::class to CalendarTypeAdapter()
+        )
+
+        val DEFAULT_Deserialize_TypeAdapterMap = hashMapOf<KClass<*>, TypeAdapter<*>>(
                 Boolean::class to BooleanTypeAdapter(),
                 CharSequence::class to CharSequenceTypeAdapter(),
                 String::class to StringTypeAdapter(),
@@ -31,21 +47,27 @@ class JsonFormatter(
                 Enum::class to EnumTypeAdapter(),
                 Date::class to DateTypeAdapter(),
                 Calendar::class to CalendarTypeAdapter(),
-
-                HashMap::class to HashMapTypeAdapter(),
-                Map::class to HashMapTypeAdapter()
-//                L::class to HashMapTypeAdapter(),
-//                HashMap::class to HashMapTypeAdapter()
+                Map::class to HashMapTypeAdapter(),
+                Collection::class to CollectionTypeAdapter()
         )
 
         val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
 
         internal fun getDeserializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): DeserializeAdapter<*>? {
-            val typeAdapter = typeAdapterMap[kClass]
-            if (typeAdapter == null && kClass.isSubclassOf(Enum::class)) {
-                return typeAdapterMap[Enum::class]
+            return typeAdapterMap[kClass] ?: return when {
+                kClass.isSubclassOf(Enum::class) -> {
+                    typeAdapterMap[Enum::class]
+                }
+                kClass.isSubclassOf(Collection::class) -> {
+                    typeAdapterMap[Collection::class]
+                }
+                kClass.isSubclassOf(Map::class)-> {
+                    typeAdapterMap[Map::class]
+                }
+                else -> {
+                    null
+                }
             }
-            return typeAdapter
         }
 
         internal fun getSerializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, SerializeAdapter<*>>): SerializeAdapter<*>? {
@@ -58,14 +80,14 @@ class JsonFormatter(
     }
 
     val mDeserializeAdapterMap = hashMapOf<KClass<*>, DeserializeAdapter<*>>().apply {
-        putAll(DEFAULT_TypeAdapterMap)
+        putAll(DEFAULT_Deserialize_TypeAdapterMap)
         deserializeAdapterMap?.let {
             putAll(it)
         }
     }
 
     val mSerializeAdapterMap = hashMapOf<KClass<*>, SerializeAdapter<*>>().apply {
-        putAll(DEFAULT_TypeAdapterMap)
+        putAll(DEFAULT_Serialize_TypeAdapterMap)
         serializeAdapterMap?.let {
             putAll(it)
         }
@@ -100,29 +122,15 @@ class JsonFormatter(
     }
 
     /**
-     * Function to deserialize json string to kotlin object in collection
+     * Function to deserialize json string to kotlin object in collection or map
      *
      * @param [T] target kotlin object type
      * @param [json] json string to deserialize
      * @param [typeToken] The [TypeToken] object with kotlin class of the target kotlin type [T] member
      *
-     * @return [Collection] The instance of Collection with member type of [T] output
+     * @return [T] The instance of Collection or Map output
      */
-    inline fun <reified T: Any, reified C: Collection<T?>> parseJson(json: String, typeToken: TypeToken<C>): Collection<T?>? {
-        return mJsonDeserializer.parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
-    }
-
-    /**
-     * Function to deserialize json string to kotlin object in map
-     *
-     * @param [F] target map key of kotlin object type
-     * @param [S] target map value of kotlin object type
-     * @param [json] json string to deserialize
-     * @param [typeToken] The [TypeToken] object with [Map] class contain [F] class as key, [S] class as value
-     *
-     * @return [Map] The instance of Map with [F] class as key, [S] class as value output
-     */
-    inline fun <reified F: Any, reified S: Any, reified C: Map<F, S?>> parseJson(json: String, typeToken: TypeToken<C>): Map<F, S?> {
+    inline fun <reified T: Any> parseJson(json: String, typeToken: TypeToken<T>): T? {
         return mJsonDeserializer.parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 }
