@@ -22,6 +22,43 @@ class JsonSerializerTest {
     }
 
     @Test
+    fun serializeArray() {
+        val array = arrayOf("Hall", "Good", "Thank You")
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(array, mTypeAdapterMap, mConfig)
+        assertEquals("""["Hall","Good","Thank You"]""", result)
+    }
+
+    @Test
+    fun serializeArrayOfObject() {
+        val array = arrayOf(
+                InnerClassA(
+                        "a",
+                        1,
+                        true,
+                        3.7
+                ),
+                InnerClassA(
+                        "b",
+                        755,
+                        false,
+                        6.9678
+                ),
+                InnerClassA(
+                        "234546",
+                        124321,
+                        false,
+                        645.7643
+                )
+        )
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(array, mTypeAdapterMap, mConfig)
+        assertEquals("""[{"booleanA":true,"doubleA":3.7,"intA":1,"stringA":"a"},{"booleanA":false,"doubleA":6.9678,"intA":755,"stringA":"b"},{"booleanA":false,"doubleA":645.7643,"intA":124321,"stringA":"234546"}]""", result)
+    }
+
+    @Test
     fun serializeList() {
         val list = listOf("Hall", "Good", "Thank You")
 

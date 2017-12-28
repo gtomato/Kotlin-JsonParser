@@ -19,6 +19,18 @@ class JsonSerializer {
     private fun checkForClass(jsonWriter: JsonWriter, obj: Any, typeAdapters: HashMap<KClass<*>, SerializeAdapter<*>>, config: JsonParserConfig) {
 
         when (obj) {
+            is Array<*> -> {
+                // array
+                jsonWriter.beginArray()
+                for (any in obj) {
+                    if (any != null) {
+                        checkForClass(jsonWriter, any, typeAdapters, config)
+                    } else {
+                        jsonWriter.nullValue()
+                    }
+                }
+                jsonWriter.endArray()
+            }
             is Collection<*> -> {
                 // list
                 jsonWriter.beginArray()
