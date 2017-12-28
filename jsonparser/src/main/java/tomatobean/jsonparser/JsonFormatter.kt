@@ -48,7 +48,8 @@ class JsonFormatter(
                 Date::class to DateTypeAdapter(),
                 Calendar::class to CalendarTypeAdapter(),
                 Map::class to HashMapTypeAdapter(),
-                Collection::class to CollectionTypeAdapter()
+                Collection::class to CollectionTypeAdapter(),
+                Array<Any>::class to ArrayTypeAdapter()
         )
 
         val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
@@ -63,6 +64,9 @@ class JsonFormatter(
                 }
                 kClass.isSubclassOf(Map::class)-> {
                     typeAdapterMap[Map::class]
+                }
+                kClass.java.isArray -> {
+                    typeAdapterMap[Array<Any>::class]
                 }
                 else -> {
                     null
