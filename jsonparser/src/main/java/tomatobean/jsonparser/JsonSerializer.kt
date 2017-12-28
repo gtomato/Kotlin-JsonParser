@@ -24,7 +24,7 @@ class JsonSerializer {
                 jsonWriter.beginArray()
                 for (any in obj) {
                     if (any != null) {
-                        createJsonObject(jsonWriter, any, typeAdapters, config)
+                        checkForClass(jsonWriter, any, typeAdapters, config)
                     } else {
                         jsonWriter.nullValue()
                     }

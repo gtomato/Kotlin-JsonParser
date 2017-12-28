@@ -2,6 +2,7 @@ package tomatobean.jsonparser
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.javaField
 
 
@@ -27,6 +28,14 @@ fun Any.toJson(): String {
  */
 inline fun <reified T: Any> String.parseJson(kClass: KClass<T>): T? {
     return JsonFormatter().parseJson(this, kClass)
+}
+
+inline fun <reified T: Any> String.testParseJson(): T? {
+//    if () {
+//        val classT = T::class as KClass<Collection<*>>
+//        return this.parseJson(TypeToken<T>())
+//    }
+    return JsonFormatter().parseJson(this, T::class)
 }
 
 /**

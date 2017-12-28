@@ -21,6 +21,99 @@ class JsonSerializerTest {
         assertEquals(classAJson, result)
     }
 
+    @Test
+    fun serializeList() {
+        val list = listOf("Hall", "Good", "Thank You")
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(list, mTypeAdapterMap, mConfig)
+        assertEquals("""["Hall","Good","Thank You"]""", result)
+    }
+
+    @Test
+    fun serializeMap() {
+        val map = mapOf("First" to "fi", "Second" to "se", "Third" to "th", "Forth" to "fo")
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(map, mTypeAdapterMap, mConfig)
+        assertEquals("""{"First":"fi","Second":"se","Third":"th","Forth":"fo"}""", result)
+    }
+
+    @Test
+    fun serializeMapOfMap() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(mapOfMap, mTypeAdapterMap, mConfig)
+        assertEquals("""{"first":{"third":"Nooo","second":"Hello"}}""", result)
+    }
+
+    @Test
+    fun serializeMapOfMapDataClass() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+        val mapOfMapDataClass = MapOfMap(mapOfMap)
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(mapOfMapDataClass, mTypeAdapterMap, mConfig)
+        assertEquals("""{"map":{"first":{"third":"Nooo","second":"Hello"}}}""", result)
+    }
+
+    @Test
+    fun serializeListOfMapOfMap() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+        val listOfMapOfMap = listOf(mapOfMap)
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(listOfMapOfMap, mTypeAdapterMap, mConfig)
+        assertEquals("""[{"first":{"third":"Nooo","second":"Hello"}}]""", result)
+    }
+
+    @Test
+    fun serializeListOfMapOfMapInDataClass() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+        val listOfMapOfMap = listOf(mapOfMap)
+        val listOfMapOfMapInDataClass = ListOfMapOfMapData(listOfMapOfMap)
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(listOfMapOfMapInDataClass, mTypeAdapterMap, mConfig)
+        assertEquals("""{"list":[{"first":{"third":"Nooo","second":"Hello"}}]}""", result)
+    }
+
+    @Test
+    fun serializeListOfMapOfMapData() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+        val mapOfMapDataClass = MapOfMap(mapOfMap)
+        val listOfMapOfMap = listOf(mapOfMapDataClass)
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(listOfMapOfMap, mTypeAdapterMap, mConfig)
+        assertEquals("""[{"map":{"first":{"third":"Nooo","second":"Hello"}}}]""", result)
+    }
+
+    @Test
+    fun serializeListOfMapOfMapDataInDataClass() {
+        val mapOfMap : Map<String, Map<String, String>> = hashMapOf("first" to hashMapOf("second" to "Hello", "third" to "Nooo"))
+        val mapOfMapDataClass = MapOfMap(mapOfMap)
+        val listOfMapOfMap = listOf(mapOfMapDataClass)
+        val listOfMapOfMapInDataClass = ListOfMapOfMapDataDataClass(listOfMapOfMap)
+
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(listOfMapOfMapInDataClass, mTypeAdapterMap, mConfig)
+        assertEquals("""{"list":[{"map":{"first":{"third":"Nooo","second":"Hello"}}}]}""", result)
+    }
+
+    data class MapOfMap(
+            val map: Map<String, Map<String, String>>
+    )
+
+    data class ListOfMapOfMapData(
+            val list: List<Map<String, Map<String, String>>>
+    )
+
+    data class ListOfMapOfMapDataDataClass(
+            val list: List<MapOfMap>
+    )
+
     //    @Test
 //    fun serializeWithAnnotation() {
 //        val serializer = JsonSerializer()
