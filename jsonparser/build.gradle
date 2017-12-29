@@ -7,9 +7,9 @@ apply plugin: 'maven'
 
 //apply plugin: 'com.github.dcendents.android-maven'
 
-apply plugin: "com.jfrog.bintray"
+//apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.3'
+version = '1.0.4'
 
 buildscript {
     ext.kotlinVersion = '1.1.51'
@@ -30,6 +30,14 @@ dependencies {
 def siteUrl = 'https://github.com/gtomato/Kotlin-JsonParser'      // Homepage URL of the library
 def gitUrl = 'https://github.com/gtomato/Kotlin-JsonParser.git'   // Git repository URL
 
+uploadArchives {
+    tasks.build.dependsOn 'deleteTemp'
+    repositories {
+        mavenDeployer {
+            repository(url: mavenLocal().getUrl())
+        }
+    }
+}
 
 install {
     repositories.mavenInstaller {
@@ -95,26 +103,26 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 // https://github.com/bintray/gradle-bintray-plugin
-bintray {
-    tasks.build.dependsOn 'deleteTemp'
-
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = "TomatoBean"
-        // it is the name that appears in bintray when logged
-        name = "com.tomatobean:jsonparser"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["MIT"]
-        publish = true
-        version {
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
-            }
-        }
-    }
-}
+//bintray {
+//    tasks.build.dependsOn 'deleteTemp'
+//
+//    user = properties.getProperty("bintray.user")
+//    key = properties.getProperty("bintray.apikey")
+//
+//    configurations = ['archives']
+//    pkg {
+//        repo = "TomatoBean"
+//        // it is the name that appears in bintray when logged
+//        name = "com.tomatobean:jsonparser"
+//        websiteUrl = siteUrl
+//        vcsUrl = gitUrl
+//        licenses = ["MIT"]
+//        publish = true
+//        version {
+//            gpg {
+//                sign = true //Determines whether to GPG sign the files. The default is false
+//                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+//            }
+//        }
+//    }
+//}

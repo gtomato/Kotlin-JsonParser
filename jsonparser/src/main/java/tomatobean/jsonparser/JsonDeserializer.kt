@@ -85,7 +85,7 @@ class JsonDeserializer {
             val memberKClass = it.returnType.jvmErasure
             val memberType = it.returnType
             val jsonKey = it.getJsonName() ?: it.name
-            val param: Any?
+            var param: Any? = null
             if (jsonObject.has(jsonKey)) {
                 if (memberKClass.isSubclassOf(Collection::class)) {
                     val jsonArr = JSONArray(jsonObject[jsonKey].toString())
@@ -105,7 +105,7 @@ class JsonDeserializer {
                         param = memberList
                     } else if (it.returnType.isMarkedNullable) {
                         param = null
-                    } else {
+                    } else if (!kParams.isOptional) {
                         throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
@@ -143,20 +143,19 @@ class JsonDeserializer {
                         }
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
-                        } else {
+                        } else if (!kParams.isOptional) {
                             throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
                         }
                     } else {
                         param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberType, memberKClass, typeAdapterMap, config)
                     }
                 }
-                if (kParams != null) {
-                    paramsMap.put(kParams, param)
-                }
             }
-        }
-        if (paramsMap.isEmpty()) {
-            throw IllegalArgumentException("No params can parse with this json: $json, please check this json string is valid")
+            if (param != null) {
+                paramsMap.put(kParams, param)
+            } else if (!kParams.isOptional && it.returnType.isMarkedNullable) {
+                paramsMap.put(kParams, param)
+            }
         }
         val missingParams = ArrayList<KParameter>()
         for (kParam in kParamList) {
@@ -205,7 +204,11 @@ class JsonDeserializer {
 
 
 open class TypeToken<T>(val nullableParams: Boolean = false) {
-    val rawType: KType = getKTypeImpl()
+    val rawType: KType = try {
+        getKTypeImpl()
+    } catch (e: Exception) {
+        this::class.starProjectedType
+    }
 }
 
 fun KClass<*>.getKTypeImpl(): KType = java.genericSuperclass.toKType().arguments.single().type!!
@@ -216,7 +219,7 @@ fun TypeToken<*>.getKTypeImpl(): KType =
 fun Type.toKType(): KType = toKTypeProjection().type!!
 
 fun Type.toKTypeProjection(): KTypeProjection = when (this) {
-    is Class<*> -> this.kotlin.toInvariantFlexibleProjection()
+    is Class<*> -> this.kotlin.toInvariantFlexibleProjection(if(this.isArray) listOf(this.componentType.toKTypeProjection()) else emptyList())
     is ParameterizedType -> {
         val erasure = (rawType as Class<*>).kotlin
         erasure.toInvariantFlexibleProjection((erasure.typeParameters.zip(actualTypeArguments).map { (parameter, argument) ->

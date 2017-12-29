@@ -2,6 +2,7 @@ package tomatobean.jsonparser
 
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmErasure
 
 /**
@@ -72,6 +73,7 @@ class JsonSerializer {
                     if (it.isSerializable()){
                         val key = it.getJsonName() ?: it.name
                         val typeAdapter = JsonFormatter.getSerializeAdapter(it.returnType.jvmErasure, typeAdapters) as? SerializeAdapter<Any>
+                        it.isAccessible = true
                         val value = it.getter.call(obj)
                         createNode(jsonWriter, key, value, typeAdapter, typeAdapters, config)
                     }

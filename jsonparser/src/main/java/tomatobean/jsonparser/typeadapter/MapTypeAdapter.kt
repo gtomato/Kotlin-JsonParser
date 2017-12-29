@@ -27,24 +27,14 @@ class HashMapTypeAdapter: TypeAdapter<HashMap<*, *>>() {
         val jsonObj = JSONObject(json)
         val childType = kType.arguments[1].type
         val hashMap = linkedMapOf<String, Any?>()
-        if (childType?.jvmErasure?.isSubclassOf(Map::class) == true) {
-            for (key in jsonObj.keys()) {
-                val childJson = jsonObj[key].toString()
-                val obj = read(childJson, childType, config, typeAdapterMap)
-                if (obj == null && !childType.isMarkedNullable) {
-                    throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
-                }
-                hashMap.put(key, obj)
+
+        for (key in jsonObj.keys()) {
+            val childJson = jsonObj[key].toString()
+            val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
+            if (obj == null && childType?.isMarkedNullable != true) {
+                throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
             }
-        } else {
-            for (key in jsonObj.keys()) {
-                val childJson = jsonObj[key].toString()
-                val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
-                if (obj == null && childType?.isMarkedNullable != true) {
-                    throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
-                }
-                hashMap.put(key, obj)
-            }
+            hashMap.put(key, obj)
         }
         if (hashMap.isEmpty()) {
             return null
