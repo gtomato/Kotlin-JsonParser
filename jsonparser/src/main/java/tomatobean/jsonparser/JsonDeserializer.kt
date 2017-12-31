@@ -5,6 +5,7 @@ import org.json.JSONObject
 import java.lang.reflect.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmErasure
 
 
@@ -73,13 +74,14 @@ class JsonDeserializer {
         val jsonObject = JSONObject(json)
 
         val kParamList = ArrayList<KParameter>()
+        val nonConstructorValueMap = hashMapOf<String, Any?>()
         members.forEach {
 
             if (!it.isDeserializable()) {
                 return@forEach
             }
-            val kParams = constructor?.findParameterByName(it.name) ?: return@forEach
-            if (!kParams.isOptional) {
+            val kParams = constructor?.findParameterByName(it.name)
+            if (kParams?.isOptional == false) {
                 kParamList.add(kParams)
             }
             val memberKClass = it.returnType.jvmErasure
@@ -105,7 +107,7 @@ class JsonDeserializer {
                         param = memberList
                     } else if (it.returnType.isMarkedNullable) {
                         param = null
-                    } else if (!kParams.isOptional) {
+                    } else if (kParams?.isOptional == false) {
                         throw MissingParamException(kClass, jsonKey)
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
@@ -143,7 +145,7 @@ class JsonDeserializer {
                         }
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
-                        } else if (!kParams.isOptional) {
+                        } else if (kParams?.isOptional == false) {
                             throw MissingParamException(kClass, jsonKey)
                         }
                     } else {
@@ -151,10 +153,14 @@ class JsonDeserializer {
                     }
                 }
             }
-            if (param != null) {
-                paramsMap.put(kParams, param)
-            } else if (!kParams.isOptional && it.returnType.isMarkedNullable) {
-                paramsMap.put(kParams, param)
+            if (kParams != null) {
+                if (param != null) {
+                    paramsMap.put(kParams, param)
+                } else if (!kParams.isOptional && it.returnType.isMarkedNullable) {
+                    paramsMap.put(kParams, param)
+                }
+            } else {
+                nonConstructorValueMap.put(it.name, param)
             }
         }
         val missingParams = ArrayList<KParameter>()
@@ -172,7 +178,21 @@ class JsonDeserializer {
             throw MissingParamException(kClass, paramList)
         }
 
-        return constructor?.callBy(paramsMap)
+        val obj = constructor?.callBy(paramsMap)
+
+        members.forEach {
+            if (nonConstructorValueMap.containsKey(it.name)) {
+                when (it) {
+                    is KMutableProperty<*> -> {
+                        val value = nonConstructorValueMap[it.name]
+                        it.isAccessible = true
+                        it.setter.call(obj, it.returnType.jvmErasure.safeCast(value))
+                    }
+                }
+            }
+        }
+
+        return obj
     }
 
     private fun checkKClassValid(kClass: KClass<*>) {
