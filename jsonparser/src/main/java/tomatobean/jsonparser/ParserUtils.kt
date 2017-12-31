@@ -37,7 +37,7 @@ inline fun <reified T: Any> String.parseJson(kClass: KClass<T>): T? {
  *
  * @return [T] The output instance of collection or map with target Kotlin class[T]
  */
-inline fun <reified T: Any> String.parseJson(typeToken: TypeToken<T>): T? {
+fun <T: Any> String.parseJson(typeToken: TypeToken<T>): T? {
     return JsonFormatter().parseJson(this, typeToken)
 }
 

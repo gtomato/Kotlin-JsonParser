@@ -134,7 +134,7 @@ class JsonFormatter(
      *
      * @return [T] The instance of Collection or Map output
      */
-    inline fun <reified T: Any> parseJson(json: String, typeToken: TypeToken<T>): T? {
+    fun <T: Any> parseJson(json: String, typeToken: TypeToken<T>): T? {
         return mJsonDeserializer.parseJson(json, typeToken, mDeserializeAdapterMap, mConfig)
     }
 }
