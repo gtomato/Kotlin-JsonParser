@@ -5,7 +5,6 @@ import tomatobean.jsonparser.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.cast
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.jvmErasure
 
 
@@ -32,7 +31,7 @@ class ArrayTypeAdapter: TypeAdapter<Array<*>>() {
             val childJson = jsonArr[index].toString()
             val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
             if (childType?.isMarkedNullable != true && obj == null) {
-                throw IllegalArgumentException("Object in index: $index is null while variable defined is a non-nullable object")
+                throw MissingParamException(kType, index)
             }
             collections.add(childType?.jvmErasure?.cast(obj))
         }

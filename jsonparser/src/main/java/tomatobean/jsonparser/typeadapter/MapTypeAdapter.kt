@@ -4,7 +4,6 @@ import org.json.JSONObject
 import tomatobean.jsonparser.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.jvmErasure
 
 
@@ -32,7 +31,7 @@ class HashMapTypeAdapter: TypeAdapter<HashMap<*, *>>() {
             val childJson = jsonObj[key].toString()
             val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
             if (obj == null && childType?.isMarkedNullable != true) {
-                throw IllegalArgumentException("Object in key: $key is null while variable defined is a non-nullable object")
+                throw MissingParamException(kType.jvmErasure, key)
             }
             hashMap.put(key, obj)
         }

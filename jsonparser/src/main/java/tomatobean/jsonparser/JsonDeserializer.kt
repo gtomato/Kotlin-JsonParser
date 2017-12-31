@@ -14,7 +14,7 @@ class JsonDeserializer {
         return when (rawType) {
             is Map<*, *> -> {
                 if (!rawType.isSupertypeOf(LinkedHashMap::class.getKTypeImpl())) {
-                    throw IllegalArgumentException("Parser Not Support This Type $rawType currently")
+                    throw TypeNotSupportException(rawType)
                 }
                 val typeAdapter = typeAdapterMap[Map::class]
                 when (typeAdapter) {
@@ -106,7 +106,7 @@ class JsonDeserializer {
                     } else if (it.returnType.isMarkedNullable) {
                         param = null
                     } else if (!kParams.isOptional) {
-                        throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
+                        throw MissingParamException(kClass, jsonKey)
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
                     val childType = it.returnType.arguments[1].type
@@ -144,7 +144,7 @@ class JsonDeserializer {
                         if (it.returnType.isMarkedNullable || obj != null) {
                             param = obj
                         } else if (!kParams.isOptional) {
-                            throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
+                            throw MissingParamException(kClass, jsonKey)
                         }
                     } else {
                         param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberType, memberKClass, typeAdapterMap, config)
@@ -165,13 +165,11 @@ class JsonDeserializer {
         }
 
         if (!missingParams.isEmpty()) {
-            val stringBuilder = StringBuilder("Object Class: ${kClass.simpleName}\n")
+            val paramList = ArrayList<String?>()
             missingParams.forEach {
-                stringBuilder.append("Param : ${it.name}\n")
+                paramList.add(it.name)
             }
-            stringBuilder.append("is(are) missing, please check json String and/or Object Structure.")
-
-            throw IllegalArgumentException(stringBuilder.toString())
+            throw MissingParamException(kClass, paramList)
         }
 
         return constructor?.callBy(paramsMap)
@@ -180,7 +178,7 @@ class JsonDeserializer {
     private fun checkKClassValid(kClass: KClass<*>) {
         when (kClass) {
             Any::class -> {
-                throw IllegalArgumentException("kotlin.Any class is not support Json Deserialize with this library")
+                throw TypeNotSupportException(kClass)
             }
         }
     }
@@ -196,7 +194,7 @@ class JsonDeserializer {
         } else if (isMarkedNullable) {
             return null
         } else {
-            throw IllegalArgumentException("Object in key: $jsonKey is null while variable defined is a non-nullable object")
+            throw MissingParamException(kClass, jsonKey)
         }
     }
 }
@@ -237,8 +235,8 @@ fun Type.toKTypeProjection(): KTypeProjection = when (this) {
         else -> KTypeProjection.STAR
     }
     is GenericArrayType -> Array<Any>::class.toInvariantFlexibleProjection(listOf(genericComponentType.toKTypeProjection()))
-    is TypeVariable<*> -> TODO()
-    else -> throw IllegalArgumentException("Unsupported type: $this")
+    is TypeVariable<*> -> throw TypeNotSupportException(this)
+    else -> throw TypeNotSupportException(this)
 }
 
 

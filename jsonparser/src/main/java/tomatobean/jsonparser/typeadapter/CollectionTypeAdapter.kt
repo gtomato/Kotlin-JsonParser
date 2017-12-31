@@ -31,16 +31,16 @@ class CollectionTypeAdapter: TypeAdapter<Collection<*>>() {
                 val childJson = jsonArr[index].toString()
                 val obj = read(childJson, childType, config, typeAdapterMap)
                 if (!childType.isMarkedNullable && obj == null) {
-                    throw IllegalArgumentException("Object in index: $index is null while variable defined is a non-nullable object")
+                    throw MissingParamException(childType, index)
                 }
                 collections.add(obj)
             }
-        } else {
+        } else if (childType != null){
             for (index in 0 until jsonArr.length()) {
                 val childJson = jsonArr[index].toString()
                 val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
-                if (childType?.isMarkedNullable != true && obj == null) {
-                    throw IllegalArgumentException("Object in index: $index is null while variable defined is a non-nullable object")
+                if (!childType.isMarkedNullable && obj == null) {
+                    throw MissingParamException(childType, index)
                 }
                 collections.add(obj)
             }
