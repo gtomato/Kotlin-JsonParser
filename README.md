@@ -18,7 +18,7 @@ To use Kotlin-JsonParser in gradle implemented project,
 ```
 dependencies {
 	...
-	implementation 'com.tomatobean:jsonparser:1.0.2'
+	implementation 'com.tomatobean:jsonparser:1.0.5'
 	...
 }
 ```
@@ -31,7 +31,7 @@ For parsing JSON String to Kotlin Object, it can be done by one line comment.
 	val kotlinObject = jsonString.parseJson(KotlinObject::class)
 ```
 
-P.S. For Json parsing, all params must be in the Primary Constructor of Kotlin Object
+P.S. For Json parsing, all immutable params must be in the Primary Constructor of Kotlin Object
 
 ```kotlin
     data class KotlinObject(
@@ -110,6 +110,24 @@ and create JsonFormatter instance by the following way
 
 
 For more usage example, you can reference to /app module
+
+#### TypeToken
+KotlinJsonParser also support List, Map class for parsering
+
+```kotlin
+    val kotlinObjectList = json.parserJson(object: TypeToke<List<KotlinObject>>(){})
+    val json = kotlinObjectList.toJson()
+```
+
+For Generic Abstract class for parsering
+
+```kotlin
+    abstract class GenericDataSource<DATA>: TypeToken<DATA> {
+        fun parserJson(json: String) {
+	    json.parserJson(this)
+	}
+    }
+````
 
 ## Authors
 
