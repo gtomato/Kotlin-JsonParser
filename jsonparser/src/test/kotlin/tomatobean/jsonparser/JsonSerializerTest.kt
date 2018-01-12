@@ -2,6 +2,10 @@ package tomatobean.jsonparser
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -125,6 +129,39 @@ class JsonSerializerTest {
         val serializer = JsonSerializer()
         val result = serializer.serialize(listOfMapOfMap, mTypeAdapterMap, mConfig)
         assertEquals("""[{"map":{"first":{"third":"Nooo","second":"Hello"}}}]""", result)
+    }
+    val differentTypeJson = """
+        {"bigDecimal":98482132138.13887873,"bigInteger":231221121,"boolean":true,"calendar":"1986-10-07 18:59:43 +0800","char":"Z","charSequence":"CharSequenceCharSequence","date":"1988-09-02 10:20:56 +0800","double":2.0222,"enum":"EnumB","float":97004.02,"int":200000,"long":909090090,"short":20,"string":"String String String String"}
+    """.trimIndent()
+
+    val differentTypeObj = JsonDeserializerTest.DifferentTypeClass(
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse("1988-09-02 10:20:56 +0800"),
+            Calendar.getInstance(TimeZone.getTimeZone("Asia/Hong_Kong")).apply {
+                set(Calendar.YEAR, 1986)
+                set(Calendar.MONTH, 9)
+                set(Calendar.DATE, 7)
+                set(Calendar.HOUR_OF_DAY, 18)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 43)
+                set(Calendar.MILLISECOND, 0)
+                setTime(this.getTime())
+            },
+            JsonDeserializerTest.DifferentTypeEnum.EnumB,
+            200000,
+            909090090,
+            20,
+            2.0222,
+            97004.02f,
+            BigDecimal("98482132138.13887873"),
+            BigInteger.valueOf(231221121),
+            "CharSequenceCharSequence",
+            "String String String String",
+            'Z',
+            true
+    )
+    @Test
+    fun serializeDifferentTypeObject() {
+        assertEquals(differentTypeJson, JsonSerializer().serialize(differentTypeObj, mTypeAdapterMap, mConfig))
     }
 
     @Test

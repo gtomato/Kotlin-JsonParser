@@ -9,18 +9,20 @@ apply plugin: 'maven'
 
 apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.5'
+version = '1.0.6'
 
 buildscript {
-    ext.kotlinVersion = '1.1.51'
+    ext.kotlinVersion = '1.2.0'
     ext.json_lib_version = '20171018'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-all:1.10.19'
-    testImplementation "org.json:json:$json_lib_version"
+
+    testCompile 'org.mockito:mockito-all:1.10.19'
+    testCompile "org.json:json:$json_lib_version"
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test-junit
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.json:json:$json_lib_version"

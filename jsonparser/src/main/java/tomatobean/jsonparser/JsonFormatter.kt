@@ -52,7 +52,7 @@ class JsonFormatter(
                 Array<Any>::class to ArrayTypeAdapter()
         )
 
-        val DEFAULT_DATE_FORMAT = "YYYY-MM-DD hh:mm:ss Z"
+        val DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z"
 
         internal fun getDeserializeAdapter(kClass: KClass<*>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>): DeserializeAdapter<*>? {
             return typeAdapterMap[kClass] ?: return when {

@@ -11,9 +11,13 @@ import kotlin.reflect.full.starProjectedType
 
 open class TypeToken<T>(val nullableParams: Boolean = false) {
     val rawType: KType = try {
-        getKTypeImpl()
+        this::class.supertypes.single().arguments[0].type!!
     } catch (e: Exception) {
-        this::class.starProjectedType
+        try {
+            getKTypeImpl()
+        } catch (e: Exception) {
+            this::class.starProjectedType
+        }
     }
 }
 

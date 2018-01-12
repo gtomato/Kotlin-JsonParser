@@ -2,7 +2,6 @@ package tomatobean.jsonparser
 
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.reflect.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.isAccessible
@@ -12,36 +11,7 @@ import kotlin.reflect.jvm.jvmErasure
 class JsonDeserializer {
     fun <T : Any> parseJson(json: String, typeToken: TypeToken<T>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): T? {
         val rawType = typeToken.rawType
-        return when (rawType) {
-            is Map<*, *> -> {
-                if (!rawType.isSupertypeOf(LinkedHashMap::class.getKTypeImpl())) {
-                    throw TypeNotSupportException(rawType)
-                }
-                val typeAdapter = typeAdapterMap[Map::class]
-                when (typeAdapter) {
-                    is TypeAdapter<*> -> {
-                        typeAdapter.read(json = json, kType = rawType, typeAdapterMap = typeAdapterMap, config = config)
-                    }
-                    else -> {
-                        typeAdapter?.read(json, config)
-                    }
-                } as T?
-            }
-            is Collection<*> -> {
-                val typeAdapter = typeAdapterMap[Collection::class]
-                when (typeAdapter) {
-                    is TypeAdapter<*> -> {
-                        typeAdapter.read(json = json, kType = rawType, typeAdapterMap = typeAdapterMap, config = config)
-                    }
-                    else -> {
-                        typeAdapter?.read(json, config)
-                    }
-                } as T?
-            }
-            else -> {
-                parseJson(json, rawType, typeAdapterMap, config) as T?
-            }
-        }
+        return parseJson(json, rawType, typeAdapterMap, config) as T?
     }
 
     fun <T : Any> parseJson(json: String, kType: KType?, kClass: KClass<T>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): T? {
@@ -91,65 +61,32 @@ class JsonDeserializer {
             if (jsonObject.has(jsonKey)) {
                 if (memberKClass.isSubclassOf(Collection::class)) {
                     val jsonArr = JSONArray(jsonObject[jsonKey].toString())
-                    if (jsonArr.length() > 0) {
-                        val memberList = ArrayList<Any>()
-                        for (index in 0..jsonArr.length() - 1) {
-                            val childType = it.returnType.arguments[0].type
-                            val childClass = it.returnType.arguments[0].type?.jvmErasure
-                            if (childClass != null) {
-                                checkKClassValid(childClass)
-                                val obj = parseJson(jsonArr[index].toString(), childType, childClass, typeAdapterMap, config)
-                                if (obj != null) {
-                                    memberList.add(obj)
-                                }
-                            }
-                        }
-                        param = memberList
-                    } else if (it.returnType.isMarkedNullable) {
-                        param = null
-                    } else if (kParams?.isOptional == false) {
+                    param = parseCollectionType(jsonArray = jsonArr,
+                            property = it,
+                            typeAdapterMap = typeAdapterMap,
+                            config = config)
+                    if (param == null && !it.returnType.isMarkedNullable && kParams?.isOptional == false) {
                         throw MissingParamException(kClass, jsonKey)
                     }
                 } else if (memberKClass.isSubclassOf(Map::class)) {
-                    val childType = it.returnType.arguments[1].type
-                    val childClass = it.returnType.arguments[1].type?.jvmErasure
-                    if (childClass != null) {
-                        checkKClassValid(childClass)
-                        val hashMap = hashMapOf<String, Any?>()
-                        val jsonMap = jsonObject.getJSONObject(jsonKey)
-                        for (key in jsonMap.keys()) {
-                            val objJson = jsonMap.get(key).toString()
-                            val obj = parseJson(objJson, childType, childClass, typeAdapterMap, config)
-                            hashMap.put(key, obj)
-                        }
-                        param = hashMap
-                    } else {
-                        param = null
+                    val jsonMap = jsonObject.getJSONObject(jsonKey)
+                    param = parseMapType(jsonMap = jsonMap,
+                            property = it,
+                            typeAdapterMap = typeAdapterMap,
+                            config = config)
+                    if (param == null && !it.returnType.isMarkedNullable && kParams?.isOptional == false) {
+                        throw MissingParamException(kClass, jsonKey)
                     }
                 } else {
-                    val memberTypeAdapter = JsonFormatter.getDeserializeAdapter(memberKClass, typeAdapterMap)
-                    if (memberTypeAdapter != null) {
-                        val obj: Any?
-                        if (jsonObject.get(jsonKey).toString().equals("null", true)) {
-                            obj = null
-                        } else {
-                            val jsonObjectString = jsonObject.get(jsonKey).toString()
-                            when (memberTypeAdapter) {
-                                is TypeAdapter -> {
-                                    obj =  memberTypeAdapter.read(jsonObjectString, memberType, config, typeAdapterMap)
-                                }
-                                else -> {
-                                    obj =  memberTypeAdapter.read(jsonObjectString, config)
-                                }
-                            }
-                        }
-                        if (it.returnType.isMarkedNullable || obj != null) {
-                            param = obj
-                        } else if (kParams?.isOptional == false) {
-                            throw MissingParamException(kClass, jsonKey)
-                        }
-                    } else {
-                        param = recursiveParseJson(it.returnType.isMarkedNullable, jsonObject, jsonKey, memberType, memberKClass, typeAdapterMap, config)
+                    param = parserSingleObjectType(jsonObject = jsonObject,
+                            jsonKey = jsonKey,
+                            memberKClass = memberKClass,
+                            memberType = memberType,
+                            property = it,
+                            typeAdapterMap = typeAdapterMap,
+                            config = config)
+                    if (param == null && !it.returnType.isMarkedNullable && kParams?.isOptional == false) {
+                        throw MissingParamException(kClass, jsonKey)
                     }
                 }
             }
@@ -164,11 +101,7 @@ class JsonDeserializer {
             }
         }
         val missingParams = ArrayList<KParameter>()
-        for (kParam in kParamList) {
-            if (!paramsMap.containsKey(kParam)) {
-                missingParams.add(kParam)
-            }
-        }
+        kParamList.filterNotTo(missingParams) { paramsMap.containsKey(it) }
 
         if (!missingParams.isEmpty()) {
             val paramList = ArrayList<String?>()
@@ -185,14 +118,75 @@ class JsonDeserializer {
                 when (it) {
                     is KMutableProperty<*> -> {
                         val value = nonConstructorValueMap[it.name]
-                        it.isAccessible = true
-                        it.setter.call(obj, it.returnType.jvmErasure.safeCast(value))
+                        if (value != null) {
+                            it.isAccessible = true
+                            it.setter.call(obj, it.returnType.jvmErasure.safeCast(value))
+                        }
                     }
                 }
             }
         }
 
         return obj
+    }
+
+    private fun parseCollectionType(jsonArray: JSONArray, property: KProperty1<*, *>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): ArrayList<Any?>? {
+        return if (jsonArray.length() > 0) {
+            val memberList = ArrayList<Any?>()
+            for (index in 0 until jsonArray.length()) {
+                val childType = property.returnType.arguments[0].type
+                val childClass = property.returnType.arguments[0].type?.jvmErasure
+                if (childClass != null) {
+                    checkKClassValid(childClass)
+                    val obj = parseJson(jsonArray[index].toString(), childType, childClass, typeAdapterMap, config)
+                    if (obj != null) {
+                        memberList.add(obj)
+                    }
+                }
+            }
+            memberList
+        } else {
+            return null
+        }
+    }
+
+    private fun parseMapType(jsonMap: JSONObject, property: KProperty1<*, *>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): HashMap<String, Any?>? {
+        val childType = property.returnType.arguments[1].type
+        val childClass = property.returnType.arguments[1].type?.jvmErasure
+        return if (childClass != null) {
+            checkKClassValid(childClass)
+            val hashMap = hashMapOf<String, Any?>()
+            for (key in jsonMap.keys()) {
+                val objJson = jsonMap.get(key).toString()
+                val obj = parseJson(objJson, childType, childClass, typeAdapterMap, config)
+                hashMap.put(key, obj)
+            }
+            hashMap
+        } else {
+            null
+        }
+    }
+
+    private fun parserSingleObjectType(jsonObject: JSONObject, jsonKey: String, memberKClass: KClass<*>, memberType: KType, property: KProperty1<*, *>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): Any? {
+        val memberTypeAdapter = JsonFormatter.getDeserializeAdapter(memberKClass, typeAdapterMap)
+        return if (memberTypeAdapter != null) {
+            val memberString = jsonObject.get(jsonKey).toString()
+            if (memberString.equals("null", true)) {
+                null
+            } else {
+                when (memberTypeAdapter) {
+                    is TypeAdapter -> {
+                        memberTypeAdapter.read(memberString, memberType, config, typeAdapterMap)
+                    }
+                    else -> {
+                        memberTypeAdapter.read(memberString, config)
+                    }
+                }
+            }
+
+        } else {
+            recursiveParseJson(property.returnType.isMarkedNullable, jsonObject, jsonKey, memberType, memberKClass, typeAdapterMap, config)
+        }
     }
 
     private fun checkKClassValid(kClass: KClass<*>) {

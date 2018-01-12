@@ -15,20 +15,21 @@ class TypeNotSupportException private constructor(rawType: String?) :IllegalArgu
 class MissingParamException : IllegalArgumentException {
 
     constructor(kClass: KClass<*>, jsonKey: String): this(objectClass = kClass.simpleName, jsonKey = jsonKey)
-    constructor(objectClass: String?, jsonKey: String) {
-        IllegalArgumentException("Object Class: $objectClass\n Object in key: $jsonKey is null while variable defined is a non-nullable object")
-    }
-    constructor(kClass: KClass<*>, jsonKeyList: ArrayList<String?>): this(objectClass = kClass.simpleName, jsonKeyList = jsonKeyList)
-    constructor(objectClass: String?, jsonKeyList: ArrayList<String?>) {
-        val stringBuilder = StringBuilder("Object Class: $objectClass\n")
-        jsonKeyList.forEach {
-            stringBuilder.append("Param : $it\n")
-        }
-        stringBuilder.append("is(are) missing, please check json String and/or Object Structure.")
-        IllegalArgumentException(stringBuilder.toString())
-    }
+    constructor(objectClass: String?, jsonKey: String) : super("Object Class: $objectClass\n Object in key: $jsonKey is null while variable defined is a non-nullable object")
+
+    constructor(kClass: KClass<*>, jsonKeyList: ArrayList<String?>) : this(objectClass = kClass.simpleName, jsonKeyList = jsonKeyList)
+    constructor(objectClass: String?, jsonKeyList: ArrayList<String?>) : super(getMissingListMsg(objectClass, jsonKeyList))
     constructor(kType: KType, index: Int): this(kType.jvmErasure, index)
-    constructor(kClass: KClass<*>, index: Int) {
-        IllegalArgumentException("Object ${kClass.simpleName} in index: $index is null while variable defined is a non-nullable object")
+    constructor(kClass: KClass<*>, index: Int) : super("Object ${kClass.simpleName} in index: $index is null while variable defined is a non-nullable object")
+
+    companion object {
+        private fun getMissingListMsg(objectClass: String?, jsonKeyList: ArrayList<String?>): String {
+            val stringBuilder = StringBuilder("Object Class: $objectClass\n")
+            jsonKeyList.forEach {
+                stringBuilder.append("Param : $it\n")
+            }
+            stringBuilder.append("is(are) missing, please check json String and/or Object Structure.")
+            return stringBuilder.toString()
+        }
     }
 }

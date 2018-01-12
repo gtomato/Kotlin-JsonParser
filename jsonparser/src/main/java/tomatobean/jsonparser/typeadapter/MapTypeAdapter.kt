@@ -22,18 +22,19 @@ class HashMapTypeAdapter: TypeAdapter<HashMap<*, *>>() {
         if (kType == null) {
             return null
         }
-//        val kClass = kType.jvmErasure
         val jsonObj = JSONObject(json)
         val childType = kType.arguments[1].type
         val hashMap = linkedMapOf<String, Any?>()
 
-        for (key in jsonObj.keys()) {
-            val childJson = jsonObj[key].toString()
-            val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
-            if (obj == null && childType?.isMarkedNullable != true) {
-                throw MissingParamException(kType.jvmErasure, key)
+        if (childType != null) {
+            for (key in jsonObj.keys()) {
+                val childJson = jsonObj[key].toString()
+                val obj = JsonDeserializer().parseJson(childJson, childType, typeAdapterMap, config)
+                if (obj == null && !childType.isMarkedNullable) {
+                    throw MissingParamException(childType.jvmErasure, key)
+                }
+                hashMap.put(key, obj)
             }
-            hashMap.put(key, obj)
         }
         if (hashMap.isEmpty()) {
             return null
