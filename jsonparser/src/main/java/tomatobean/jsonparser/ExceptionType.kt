@@ -14,13 +14,29 @@ class TypeNotSupportException private constructor(rawType: String?) :IllegalArgu
 
 class MissingParamException : IllegalArgumentException {
 
+    val className: String
+    val missingParamKeyList: List<String>
+
     constructor(kClass: KClass<*>, jsonKey: String): this(objectClass = kClass.simpleName, jsonKey = jsonKey)
-    constructor(objectClass: String?, jsonKey: String) : super("Object Class: $objectClass\n Object in key: $jsonKey is null while variable defined is a non-nullable object")
+    constructor(objectClass: String?, jsonKey: String) : super("Object Class: $objectClass\n Object in key: $jsonKey is null while variable defined is a non-nullable object") {
+        className = objectClass?: "UNKNOWN"
+        missingParamKeyList = listOf(
+                jsonKey
+        )
+    }
 
     constructor(kClass: KClass<*>, jsonKeyList: ArrayList<String?>) : this(objectClass = kClass.simpleName, jsonKeyList = jsonKeyList)
-    constructor(objectClass: String?, jsonKeyList: ArrayList<String?>) : super(getMissingListMsg(objectClass, jsonKeyList))
+    constructor(objectClass: String?, jsonKeyList: ArrayList<String?>) : super(getMissingListMsg(objectClass, jsonKeyList)) {
+        className = objectClass?: "UNKNOWN"
+        missingParamKeyList = jsonKeyList.filterNotNull()
+    }
     constructor(kType: KType, index: Int): this(kType.jvmErasure, index)
-    constructor(kClass: KClass<*>, index: Int) : super("Object ${kClass.simpleName} in index: $index is null while variable defined is a non-nullable object")
+    constructor(kClass: KClass<*>, index: Int) : super("Object ${kClass.simpleName} in index: $index is null while variable defined is a non-nullable object") {
+        className = kClass.simpleName?: "UNKNOWN"
+        missingParamKeyList = listOf(
+                "Index: $index"
+        )
+    }
 
     companion object {
         private fun getMissingListMsg(objectClass: String?, jsonKeyList: ArrayList<String?>): String {
