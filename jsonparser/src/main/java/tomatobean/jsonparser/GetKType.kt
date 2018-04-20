@@ -6,12 +6,14 @@ import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.jvmErasure
 
 
-open class TypeToken<T>(val nullableParams: Boolean = false) {
-    val rawType: KType = try {
-        this::class.supertypes.single().arguments[0].type!!
+open class TypeToken<T> {
+    val rawType: KType? = try {
+        this::class.supertypes.find { it.jvmErasure.isSubclassOf(TypeToken::class) }?.arguments?.get(0)?.type?: getKTypeImpl()
     } catch (e: Exception) {
         try {
             getKTypeImpl()

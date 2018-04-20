@@ -9,7 +9,7 @@ apply plugin: 'maven'
 
 apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.6'
+version = '1.0.7'
 
 buildscript {
     ext.kotlinVersion = '1.2.0'
@@ -26,6 +26,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.json:json:$json_lib_version"
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
 
 }
 

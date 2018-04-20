@@ -9,6 +9,8 @@ Kotlin-JsonParser is a Kotlin library for JSON parsing. It can parse JSON string
 * Support annotation for enabling/disabling features (e.g. serialization), see also [here](#annotation)
 > flexible custom class serialize and deserialize
 * Support TypeAdapter for custom deserialize and serialize process, see also [here](#typadapter)
+> Retrofit Ready
+* ConverterFactory of Retrofit already implemented in JsonConverterFactory, see also [here]()
 
 ## Getting Started
 
@@ -18,7 +20,7 @@ To use Kotlin-JsonParser in gradle implemented project,
 ```
 dependencies {
 	...
-	implementation 'com.tomatobean:jsonparser:1.0.6'
+	implementation 'com.tomatobean:jsonparser:1.0.7'
 	...
 }
 ```
@@ -128,6 +130,15 @@ For Generic Abstract class for parsering
 	}
     }
 ````
+
+#### JsonConverterFactory
+KotlinJsonParser already support [Retrofit](https://github.com/square/retrofit) 
+By adding JsonConverterFactory into retrofit service,
+ it can convert the network response to corresponding kotlin object
+ ```kotlin
+    Retrofit.Builder().addConverterFactory(JsonConverterFactory())
+    ....
+```
 
 ## Authors
 
