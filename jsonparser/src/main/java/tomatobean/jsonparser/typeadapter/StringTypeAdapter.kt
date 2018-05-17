@@ -5,9 +5,17 @@ import tomatobean.jsonparser.JsonWriter
 import tomatobean.jsonparser.TypeAdapter
 
 
-class CharSequenceTypeAdapter: TypeAdapter<CharSequence>() {
+class CharSequenceTypeAdapter : TypeAdapter<CharSequence>() {
     override fun write(output: JsonWriter, value: CharSequence?, config: JsonParserConfig): JsonWriter {
-        return output.value(value?.toString()?.replace("\"", "\\\""))
+        return output.value(
+                value?.toString()?.replace("\"", "\\\"")?.run {
+                    if (config.replaceNewLine) {
+                        replace("\n", "\\n")
+                    } else {
+                        this
+                    }
+                }
+        )
     }
 
     override fun read(json: String, config: JsonParserConfig): CharSequence? {
@@ -15,9 +23,17 @@ class CharSequenceTypeAdapter: TypeAdapter<CharSequence>() {
     }
 }
 
-class StringTypeAdapter: TypeAdapter<String>(){
+class StringTypeAdapter : TypeAdapter<String>() {
     override fun write(output: JsonWriter, value: String?, config: JsonParserConfig): JsonWriter {
-        return output.value(value?.replace("\"", "\\\""))
+        return output.value(
+                value?.replace("\"", "\\\"")?.run {
+                    if (config.replaceNewLine) {
+                        replace("\n", "\\n")
+                    } else {
+                        this
+                    }
+                }
+        )
     }
 
     override fun read(json: String, config: JsonParserConfig): String? {
@@ -25,9 +41,17 @@ class StringTypeAdapter: TypeAdapter<String>(){
     }
 }
 
-class CharTypeAdapter: TypeAdapter<Char>(){
+class CharTypeAdapter : TypeAdapter<Char>() {
     override fun write(output: JsonWriter, value: Char?, config: JsonParserConfig): JsonWriter {
-        return output.value(value?.toString()?.replace("\"", "\\\""))
+        return output.value(
+                value?.toString()?.replace("\"", "\\\"")?.run {
+                    if (config.replaceNewLine) {
+                        replace("\n", "\\n")
+                    } else {
+                        this
+                    }
+                }
+        )
     }
 
     override fun read(json: String, config: JsonParserConfig): Char? {
