@@ -19,6 +19,13 @@ class JsonSerializerTest {
     private val mConfig = JsonParserConfig()
 
     @Test
+    fun serializeDoubleQuoteString() {
+        val serializer = JsonSerializer()
+        val result = serializer.serialize(doubleQuoteStringObject, mTypeAdapterMap, mConfig)
+        assertEquals(doubleQuoteStringJson, result)
+    }
+
+    @Test
     fun serialize() {
         val serializer = JsonSerializer()
         val result = serializer.serialize(classAObj, mTypeAdapterMap, mConfig)
@@ -355,4 +362,8 @@ class JsonSerializerTest {
                     )
             )
     )
+
+    private val doubleQuoteStringJson = """{"stringA":"\"Testing String"}"""
+    private data class DoubleQuoteString(val stringA: String)
+    private val doubleQuoteStringObject = DoubleQuoteString("\"Testing String")
 }
