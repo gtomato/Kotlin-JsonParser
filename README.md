@@ -20,7 +20,7 @@ To use Kotlin-JsonParser in gradle implemented project,
 ```
 dependencies {
 	...
-	implementation 'com.tomatobean:jsonparser:1.0.7'
+	implementation 'com.tomatobean:jsonparser:1.0.8'
 	...
 }
 ```
