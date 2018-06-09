@@ -9,7 +9,7 @@ apply plugin: 'maven'
 
 apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.8'
+version = '1.0.9'
 
 buildscript {
     ext.kotlinVersion = '1.2.0'
@@ -34,7 +34,7 @@ def siteUrl = 'https://github.com/gtomato/Kotlin-JsonParser'      // Homepage UR
 def gitUrl = 'https://github.com/gtomato/Kotlin-JsonParser.git'   // Git repository URL
 
 uploadArchives {
-    tasks.build.dependsOn 'deleteTemp'
+//    tasks.build.dependsOn 'deleteTemp'
     repositories {
         mavenDeployer {
             repository(url: mavenLocal().getUrl())
@@ -107,7 +107,7 @@ properties.load(project.rootProject.file('local.properties').newDataInputStream(
 
 // https://github.com/bintray/gradle-bintray-plugin
 bintray {
-    tasks.build.dependsOn 'deleteTemp'
+//    tasks.build.dependsOn 'deleteTemp'
 
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
