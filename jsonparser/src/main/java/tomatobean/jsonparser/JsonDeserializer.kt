@@ -131,8 +131,8 @@ class JsonDeserializer {
     }
 
     private fun parseCollectionType(jsonArray: JSONArray, property: KProperty1<*, *>, typeAdapterMap: HashMap<KClass<*>, DeserializeAdapter<*>>, config: JsonParserConfig): ArrayList<Any?>? {
+        val memberList = ArrayList<Any?>()
         return if (jsonArray.length() > 0) {
-            val memberList = ArrayList<Any?>()
             for (index in 0 until jsonArray.length()) {
                 val childType = property.returnType.arguments[0].type
                 val childClass = property.returnType.arguments[0].type?.jvmErasure
@@ -146,7 +146,7 @@ class JsonDeserializer {
             }
             memberList
         } else {
-            return null
+            return memberList
         }
     }
 

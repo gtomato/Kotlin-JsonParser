@@ -9,7 +9,7 @@ apply plugin: 'maven'
 
 apply plugin: "com.jfrog.bintray"
 group = 'com.tomatobean'
-version = '1.0.9'
+version = '1.0.10'
 
 buildscript {
     ext.kotlinVersion = '1.2.0'
